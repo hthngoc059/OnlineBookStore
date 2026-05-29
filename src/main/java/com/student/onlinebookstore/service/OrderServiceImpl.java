@@ -14,9 +14,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class OrderServiceImpl implements OrderService {
-    
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
     
     private OrderDAO orderDAO;
@@ -26,7 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private PaymentDAO paymentDAO;
     private DiscountService discountService;
     private NotificationService notificationService;
-    
+    @Autowired 
     public OrderServiceImpl(OrderDAO orderDAO, CartDAO cartDAO, BookDAO bookDAO,
                            AddressDAO addressDAO, PaymentDAO paymentDAO,
                            DiscountService discountService, NotificationService notificationService) {
@@ -278,7 +280,7 @@ public class OrderServiceImpl implements OrderService {
         response.setFinalAmount(order.getFinalAmount());
         response.setStatus(order.getStatus().name());
         response.setPaymentStatus(order.getPaymentStatus().name());
-        
+        response.setUserId(order.getUser().getUserId());
         // Set address
         AddressResponse addressResponse = new AddressResponse(
             address.getAddressId(), address.getFullName(), address.getPhone(),

@@ -17,6 +17,7 @@ public class OrderResponse {
     private List<OrderItemResponse> items;
     private PaymentResponse payment;
     private int totalItems;
+    private Integer userId;
     
     // Constructors
     public OrderResponse() {}
@@ -132,7 +133,14 @@ public class OrderResponse {
     public void setTotalItems(int totalItems) {
         this.totalItems = totalItems;
     }
-    
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
     // Helper method to get status in Vietnamese
     public String getStatusVietnamese() {
         switch (status) {
@@ -154,5 +162,11 @@ public class OrderResponse {
             case "refunded": return "Refunded";
             default: return paymentStatus;
         }
+    }
+    public String getOrderDateFormatted() {
+        if (orderDate == null) return "";
+        return orderDate.format(
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+        );
     }
 }

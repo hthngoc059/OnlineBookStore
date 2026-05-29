@@ -1,7 +1,9 @@
 package com.student.onlinebookstore.dao;
 
+import com.student.onlinebookstore.model.Address;
 import com.student.onlinebookstore.model.Order;
 import com.student.onlinebookstore.model.OrderItem;
+import com.student.onlinebookstore.model.User;
 import com.student.onlinebookstore.util.DBConnection;
 
 import java.math.BigDecimal;
@@ -10,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class OrderDAO {
     private static final Logger logger = LoggerFactory.getLogger(OrderDAO.class);
     // SQL Queries
@@ -77,6 +81,7 @@ public class OrderDAO {
                 ResultSet rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
                     orderId = rs.getInt(1);
+                    order.setOrderId(orderId);
                 }
             }
             
@@ -360,11 +365,20 @@ public class OrderDAO {
         order.setFinalAmount(rs.getBigDecimal("final_amount"));
         order.setStatus(Order.OrderStatus.valueOf(rs.getString("status")));
         order.setPaymentStatus(Order.PaymentStatus.valueOf(rs.getString("payment_status")));
-        
+
+        // ✅ THÊM 2 ĐOẠN NÀY
+        User user = new User();
+        user.setUserId(rs.getInt("user_id"));
+        order.setUser(user);
+
+        Address address = new Address();
+        address.setAddressId(rs.getInt("address_id"));
+        order.setAddress(address);
+        // ✅ KẾT THÚC THÊM
+
         if (rs.getTimestamp("updated_at") != null) {
             order.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         }
-        
         return order;
     }
 

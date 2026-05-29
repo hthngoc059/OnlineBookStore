@@ -112,7 +112,7 @@ public class UserController extends HttpServlet {
 
         // Lưu user vào session
         HttpSession session = request.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute("currentUser", user);
         
         // Forward về home
         forwardToHome(request, response);
