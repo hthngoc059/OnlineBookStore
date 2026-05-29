@@ -253,4 +253,18 @@ public class ReviewDAO {
         
         return null;
     }
+    public int getRatingCountByStar(int bookId, int star) {
+        String sql = "SELECT COUNT(*) FROM reviews WHERE book_id = ? AND rating = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, bookId);
+            pstmt.setInt(2, star);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

@@ -74,7 +74,11 @@ public class BookDAO {
             pstmt.setString(4, book.getDescription());
             pstmt.setString(5, book.getIsbn());
             pstmt.setString(6, book.getPublisher());
-            pstmt.setInt(7, book.getPublishedYear() != null ? book.getPublishedYear().getValue() : null);
+            if (book.getPublishedYear() != null) {
+                pstmt.setInt(7, book.getPublishedYear().getValue());
+            } else {
+                pstmt.setNull(7, java.sql.Types.INTEGER);
+            }
             pstmt.setString(8, book.getLanguage());
             pstmt.setBigDecimal(9, book.getPrice());
             pstmt.setInt(10, book.getStockQuantity());
@@ -244,22 +248,41 @@ public class BookDAO {
     // Get new arrivals
     public List<Book> getNewArrivals(int limit) {
         List<Book> books = new ArrayList<>();
-        
+
+        System.out.println("=== getNewArrivals() called with limit=" + limit);
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL_NEW_ARRIVALS)) {
-            
+
+            System.out.println("Connected to DB successfully!");
             pstmt.setInt(1, limit);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
+                System.out.println("Query executed, checking results...");
+
+                int rowCount = 0;
                 while (rs.next()) {
-                    books.add(mapResultSetToBook(rs));
+                    rowCount++;
+                    System.out.println("Row " + rowCount + ": Processing book...");
+
+                    Book book = mapResultSetToBook(rs);
+                    if (book != null) {
+                        books.add(book);
+                        System.out.println("  Added book: " + book.getTitle());
+                    } else {
+                        System.out.println("  ERROR: mapResultSetToBook returned null!");
+                    }
                 }
+                System.out.println("Total rows found: " + rowCount);
             }
-            
+
         } catch (SQLException e) {
+            System.out.println("SQL ERROR: " + e.getMessage());
+            System.out.println("Error code: " + e.getErrorCode());
             e.printStackTrace();
         }
-        
+
+        System.out.println("Returning " + books.size() + " books");
         return books;
     }
     
@@ -422,36 +445,80 @@ public class BookDAO {
     // Map ResultSet to Book object
     private Book mapResultSetToBook(ResultSet rs) throws SQLException {
         Book book = new Book();
-        book.setBookId(rs.getInt("book_id"));
-        book.setCoverImageUrl(rs.getString("cover_image_url"));
-        book.setTitle(rs.getString("title"));
-        book.setAuthor(rs.getString("author"));
-        book.setDescription(rs.getString("description"));
-        book.setIsbn(rs.getString("ISBN"));
-        book.setPublisher(rs.getString("publisher"));
-        
-        int year = rs.getInt("published_year");
-        if (year > 0) {
-            book.setPublishedYear(Year.of(year));
+
+        try {
+            book.setBookId(rs.getInt("book_id"));
+            book.setCoverImageUrl(rs.getString("cover_image_url"));
+            book.setTitle(rs.getString("title"));
+            book.setAuthor(rs.getString("author"));
+            book.setDescription(rs.getString("description"));
+            book.setIsbn(rs.getString("ISBN"));
+            book.setPublisher(rs.getString("publisher"));
+
+            // Xử lý published_year có thể null
+            int year = rs.getInt("published_year");
+            if (!rs.wasNull() && year > 0) {
+                book.setPublishedYear(Year.of(year));
+            }
+
+            book.setLanguage(rs.getString("language"));
+            book.setPrice(rs.getBigDecimal("price"));
+            book.setStockQuantity(rs.getInt("stock_quantity"));
+            book.setSlug(rs.getString("slug"));
+
+            // Xử lý format có thể null
+            String formatStr = rs.getString("format");
+            if (formatStr != null && !formatStr.isEmpty()) {
+                book.setFormat(Book.Format.valueOf(formatStr));
+            }
+
+            book.setIsAvailable(rs.getBoolean("is_available"));
+
+            // XỬ LÝ created_at CÓ THỂ NULL
+            Timestamp createdAt = rs.getTimestamp("created_at");
+            if (createdAt != null) {
+                book.setCreatedAt(createdAt.toLocalDateTime());
+            } else {
+                book.setCreatedAt(java.time.LocalDateTime.now());
+            }
+
+            // XỬ LÝ updated_at CÓ THỂ NULL
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            if (updatedAt != null) {
+                book.setUpdatedAt(updatedAt.toLocalDateTime());
+            }
+
+            System.out.println("Mapped book: " + book.getTitle() + " - Price: " + book.getPrice());
+
+        } catch (Exception e) {
+            System.out.println("ERROR in mapResultSetToBook: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        
-        book.setLanguage(rs.getString("language"));
-        book.setPrice(rs.getBigDecimal("price"));
-        book.setStockQuantity(rs.getInt("stock_quantity"));
-        book.setSlug(rs.getString("slug"));
-        
-        String formatStr = rs.getString("format");
-        if (formatStr != null) {
-            book.setFormat(Book.Format.valueOf(formatStr));
-        }
-        
-        book.setIsAvailable(rs.getBoolean("is_available"));
-        book.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        
-        if (rs.getTimestamp("updated_at") != null) {
-            book.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-        }
-        
+
         return book;
+    }
+    private static final String SQL_GET_GENRES_BY_BOOK =
+        "SELECT g.genre_id, g.genre_name FROM genres g " +
+        "JOIN book_genre bg ON g.genre_id = bg.genre_id " +
+        "WHERE bg.book_id = ?";
+
+    public java.util.Set<com.student.onlinebookstore.model.Genre> getGenresByBookId(int bookId) {
+        java.util.Set<com.student.onlinebookstore.model.Genre> genres = new java.util.HashSet<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_GENRES_BY_BOOK)) {
+            pstmt.setInt(1, bookId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    com.student.onlinebookstore.model.Genre g = new com.student.onlinebookstore.model.Genre();
+                    g.setGenreId(rs.getInt("genre_id"));
+                    g.setGenreName(rs.getString("genre_name"));
+                    genres.add(g);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return genres;
     }
 }
