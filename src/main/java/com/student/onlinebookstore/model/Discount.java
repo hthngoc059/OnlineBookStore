@@ -64,6 +64,16 @@ public class Discount {
     
     public BigDecimal getDiscountValue() { return discountValue; }
     public void setDiscountValue(BigDecimal discountValue) { this.discountValue = discountValue; }
+
+    public String getDiscountValueFormatted() {
+        if (discountValue == null) return "0";
+        
+        if (discountType == DiscountType.percent) {
+            return String.format("%.0f%%", discountValue);
+        } else {
+            return String.format("%,.0f", discountValue).replace(",", ".");
+        }
+    }
     
     public LocalDateTime getStartDate() { return startDate; }
     public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }

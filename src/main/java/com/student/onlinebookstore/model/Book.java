@@ -135,6 +135,18 @@ public class Book {
     
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getPriceFormatted() {
+        if (price == null) return "0";
+        
+        java.text.DecimalFormat df = new java.text.DecimalFormat();
+        df.setGroupingUsed(true);
+        df.setGroupingSize(3);
+        df.setMinimumFractionDigits(0);
+        df.setMaximumFractionDigits(0);
+        
+        return df.format(price).replace(",", ".");
+    }
     
     public Integer getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(Integer stockQuantity) { 

@@ -82,13 +82,28 @@ public class Order {
     
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+
+    public String getTotalAmountFormatted() {
+        if (totalAmount == null) return "0";
+        return String.format("%,.0f", totalAmount).replace(",", ".");
+    }
     
     public BigDecimal getDiscountAmount() { return discountAmount; }
     public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
     
+    public String getDiscountAmountFormatted() {
+        if (discountAmount == null) return "0";
+        return String.format("%,.0f", discountAmount).replace(",", ".");
+    }
+
     public BigDecimal getFinalAmount() { return finalAmount; }
     public void setFinalAmount(BigDecimal finalAmount) { this.finalAmount = finalAmount; }
     
+    public String getFinalAmountFormatted() {
+        if (finalAmount == null) return "0";
+        return String.format("%,.0f", finalAmount).replace(",", ".");
+    }
+
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
     
