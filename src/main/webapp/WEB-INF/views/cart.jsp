@@ -28,7 +28,7 @@
                     </button>
                 </form>
             </li>
-            <c:if test="${sessionScope.user.role=='admin'}">
+            <c:if test="${sessionScope.currentUser.role=='admin'}">
                 <li><a href="${pageContext.request.contextPath}/admin/dashboard">Quản trị</a></li>
             </c:if>
         </ul>
@@ -40,9 +40,31 @@
                 </c:if>
             </a>
             <c:choose>
-                <c:when test="${sessionScope.user != null}">
-                    <span>Xin chào, ${sessionScope.user.username}</span>
-                    <a href="${pageContext.request.contextPath}/user?action=logout" class="btn-link">Đăng xuất</a>
+                <c:when test="${sessionScope.currentUser != null}">
+                    <div class="user-dropdown">
+                        <div class="user-dropdown__trigger">
+                            <img src="${pageContext.request.contextPath}/images/user.png" 
+                                 width="26" height="26" alt="user"/>
+                            <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
+                            <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+                        </div>
+                        <div class="user-dropdown__menu">
+                            <div class="user-dropdown__arrow"></div>
+                            <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
+                                <i class="bi bi-person-circle"></i>
+                                Tài khoản của tôi
+                            </a>
+                            <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
+                                <i class="bi bi-bag-check"></i>
+                                Đơn mua
+                            </a>
+                            <div class="user-dropdown__divider"></div>
+                            <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
                 </c:when>
                 <c:otherwise>
                     <a href="${pageContext.request.contextPath}/books" class="btn-link">Tài khoản</a>
@@ -56,7 +78,7 @@
         <h1 class="cart-title">🛒 Giỏ hàng của bạn</h1>
 
         <c:choose>
-            <c:when test="${sessionScope.user == null}">
+            <c:when test="${sessionScope.currentUser == null}">
                 <div class="cart-empty">
                     <h3>Vui lòng đăng nhập để xem giỏ hàng</h3>
                     <a href="${pageContext.request.contextPath}/books">Đăng nhập ngay</a>
@@ -173,6 +195,28 @@
             }
         }
     </script>
+<script>
+(function() {
+    const trigger = document.querySelector('.user-dropdown__trigger');
+    const menu    = document.querySelector('.user-dropdown__menu');
+    if (!trigger || !menu) return;
 
+    // Bấm vào trigger → toggle menu
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('open');
+    });
+
+    // Bấm ra ngoài → đóng menu
+    document.addEventListener('click', function() {
+        menu.classList.remove('open');
+    });
+
+    // Bấm vào menu không đóng
+    menu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+})();
+</script>
 </body>
 </html>

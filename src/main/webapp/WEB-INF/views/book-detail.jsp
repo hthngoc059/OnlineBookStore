@@ -21,6 +21,9 @@
             <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
             <li class="navbar__search-item">
                 <form action="${pageContext.request.contextPath}/books" method="get">
+                    <input type="hidden" 
+           name="${_csrf.parameterName}" 
+           value="${_csrf.token}"/>
                     <input type="hidden" name="action" value="search">
                     <input type="text" name="keyword" placeholder="Tìm sách..." autocomplete="off">
                     <button type="submit">
@@ -28,7 +31,7 @@
                     </button>
                 </form>
             </li>
-            <c:if test="${sessionScope.user.role=='admin'}">
+            <c:if test="${sessionScope.currentUser.role=='admin'}">
                 <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
             </c:if>
         </ul>
@@ -46,9 +49,31 @@
                 <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="orders"/>
             </a>
             <c:choose>
-                <c:when test="${sessionScope.user != null}">
-                    <span>Xin chào, ${sessionScope.user.username}</span>
-                    <a href="${pageContext.request.contextPath}/user?action=logout" class="btn-link">Đăng xuất</a>
+                <c:when test="${sessionScope.currentUser != null}">
+                    <div class="user-dropdown">
+                        <div class="user-dropdown__trigger">
+                            <img src="${pageContext.request.contextPath}/images/user.png" 
+                                 width="26" height="26" alt="user"/>
+                            <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
+                            <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+                        </div>
+                        <div class="user-dropdown__menu">
+                            <div class="user-dropdown__arrow"></div>
+                            <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
+                                <i class="bi bi-person-circle"></i>
+                                Tài khoản của tôi
+                            </a>
+                            <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
+                                <i class="bi bi-bag-check"></i>
+                                Đơn mua
+                            </a>
+                            <div class="user-dropdown__divider"></div>
+                            <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
                 </c:when>
                 <c:otherwise>
                     <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
@@ -85,8 +110,11 @@
 
                 <div class="detail-cover-actions">
                     <c:choose>
-                        <c:when test="${sessionScope.user != null}">
+                        <c:when test="${sessionScope.currentUser != null}">
                             <form action="${pageContext.request.contextPath}/wishlist" method="post" style="flex:1;">
+                                <input type="hidden" 
+           name="${_csrf.parameterName}" 
+           value="${_csrf.token}"/>
                                 <input type="hidden" name="action" value="toggle">
                                 <input type="hidden" name="bookId" value="${book.bookId}">
                                 <button type="submit" class="btn-wishlist ${inWishlist ? 'active' : ''}">
@@ -348,7 +376,7 @@
         <div class="write-review-box">
             <p class="write-review-title">✍️ Viết đánh giá của bạn</p>
             <c:choose>
-                <c:when test="${sessionScope.user != null}">
+                <c:when test="${sessionScope.currentUser != null}">
                     <c:if test="${not empty reviewSuccess}">
                         <div class="modal-alert modal-alert-success">${reviewSuccess}</div>
                     </c:if>
@@ -356,6 +384,9 @@
                         <div class="modal-alert modal-alert-error">${reviewError}</div>
                     </c:if>
                     <form action="${pageContext.request.contextPath}/reviews" method="post">
+                        <input type="hidden" 
+           name="${_csrf.parameterName}" 
+           value="${_csrf.token}"/>
                         <input type="hidden" name="action" value="add">
                         <input type="hidden" name="bookId" value="${book.bookId}">
                         <input type="hidden" name="rating" id="ratingInput" value="0">
@@ -409,6 +440,9 @@
                         <div class="modal-alert modal-alert-error">${loginError}</div>
                     </c:if>
                     <form action="${pageContext.request.contextPath}/user" method="post">
+                        <input type="hidden" 
+           name="${_csrf.parameterName}" 
+           value="${_csrf.token}"/>
                         <input type="hidden" name="action" value="login">
                         <div class="modal-form-group">
                             <label for="loginUsername">Tên đăng nhập</label>
@@ -424,6 +458,7 @@
                 </div>
                 <div class="tab-content" id="content-register">
                     <form action="${pageContext.request.contextPath}/user" method="post">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         <input type="hidden" name="action" value="register">
                         <div class="modal-form-group">
                             <label for="regUsername">Tên đăng nhập *</label>
@@ -615,6 +650,28 @@
             if (modal) modal.style.display = 'none';
         });
     </script>
+<script>
+(function() {
+    const trigger = document.querySelector('.user-dropdown__trigger');
+    const menu    = document.querySelector('.user-dropdown__menu');
+    if (!trigger || !menu) return;
 
+    // Bấm vào trigger → toggle menu
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('open');
+    });
+
+    // Bấm ra ngoài → đóng menu
+    document.addEventListener('click', function() {
+        menu.classList.remove('open');
+    });
+
+    // Bấm vào menu không đóng
+    menu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+})();
+</script>
 </body>
 </html>

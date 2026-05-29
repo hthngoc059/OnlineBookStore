@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
+@Service
 public class NotificationServiceImpl implements NotificationService {
     
     private static final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);

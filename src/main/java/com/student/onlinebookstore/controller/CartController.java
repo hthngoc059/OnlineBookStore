@@ -1,5 +1,6 @@
 package com.student.onlinebookstore.controller;
 
+import com.student.onlinebookstore.config.ApplicationContextProvider;
 import com.student.onlinebookstore.dao.BookDAO;
 import com.student.onlinebookstore.dao.CartDAO;
 import com.student.onlinebookstore.model.Book;
@@ -23,8 +24,8 @@ public class CartController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        cartDAO = new CartDAO();
-        bookDAO = new BookDAO();
+        cartDAO = ApplicationContextProvider.getBean(CartDAO.class);
+        bookDAO = ApplicationContextProvider.getBean(BookDAO.class);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class CartController extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("currentUser");
 
         if (user == null) {
             request.setAttribute("error", "Vui lòng đăng nhập để xem giỏ hàng!");
@@ -106,10 +107,12 @@ public class CartController extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("currentUser");
 
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/books");
+            // ✅ SỬA
+            response.sendRedirect(request.getContextPath() + "/books?action=detail&id=" 
+                + request.getParameter("id"));
             return;
         }
 
@@ -152,7 +155,7 @@ public class CartController extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("currentUser");
 
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/books");
@@ -183,7 +186,7 @@ public class CartController extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("currentUser");
 
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/books");
@@ -221,7 +224,7 @@ public class CartController extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("currentUser");
 
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/books");

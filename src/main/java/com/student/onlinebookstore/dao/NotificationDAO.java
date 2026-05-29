@@ -7,7 +7,9 @@ import com.student.onlinebookstore.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class NotificationDAO {
     // SQL Queries
     private static final String SQL_CREATE_NOTIFICATION = 
