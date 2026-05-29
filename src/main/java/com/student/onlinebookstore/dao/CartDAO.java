@@ -7,7 +7,9 @@ import com.student.onlinebookstore.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class CartDAO {
     // SQL Queries
     private static final String SQL_GET_OR_CREATE_CART = 
@@ -39,24 +41,38 @@ public class CartDAO {
     
     //Get or create cart for user
     public int getOrCreateCart(int userId) {
-        int cartId = -1;
-        
+        // Bước 1: thử lấy cart đã có
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_OR_CREATE_CART, Statement.RETURN_GENERATED_KEYS)) {
-            
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_CART_BY_USER)) {
+
             pstmt.setInt(1, userId);
-            pstmt.executeUpdate();
-            
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                cartId = rs.getInt(1);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cart_id");  // đã có → trả về luôn
+                }
             }
-            
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        return cartId;
+
+        // Bước 2: chưa có → tạo mới
+        String sqlInsert = "INSERT INTO carts (user_id) VALUES (?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setInt(1, userId);
+            pstmt.executeUpdate();
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
     }
     
     //Get cart by user ID

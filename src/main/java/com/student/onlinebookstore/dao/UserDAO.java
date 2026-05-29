@@ -7,7 +7,9 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class UserDAO {
     // SQL Queries
     private static final String SQL_AUTHENTICATE = 
