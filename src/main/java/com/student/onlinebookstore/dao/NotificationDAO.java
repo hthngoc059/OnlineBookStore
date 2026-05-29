@@ -335,6 +335,67 @@ public class NotificationDAO {
         
         return count;
     }
+    public List<Notification> getAllNotificationsWithUsers(int page, int size) {
+        List<Notification> notifications = new ArrayList<>();
+        int offset = page * size;
+        
+        String sql = "SELECT n.*, u.username, u.email FROM notifications n " +
+                    "JOIN users u ON n.user_id = u.user_id " +
+                    "ORDER BY n.created_at DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, size);
+            pstmt.setInt(2, offset);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Notification notification = new Notification();
+                    notification.setNotificationId(rs.getInt("notification_id"));
+                    notification.setTitle(rs.getString("title"));
+                    notification.setMessage(rs.getString("message"));
+                    notification.setIsRead(rs.getBoolean("is_read"));
+                    notification.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    
+                    User user = new User();
+                    user.setUserId(rs.getInt("user_id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    notification.setUser(user);
+                    
+                    notifications.add(notification);
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return notifications;
+    }
+
+    /**
+     * Count total notifications (for pagination)
+     */
+    public int countAllNotifications() {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM notifications";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery()) {
+            
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return count;
+    }
     
     // Send low stock notification
     public boolean sendLowStockNotification(int bookId, String bookTitle, int currentStock) {
