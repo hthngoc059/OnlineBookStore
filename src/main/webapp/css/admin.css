@@ -1,0 +1,757 @@
+@font-face {
+    font-family: 'Arimo';
+    src: url('/OnlineBookStore/fonts/Arimo.ttf') format('truetype');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'Arimo-Bold';
+    src: url('/OnlineBookStore/fonts/Arimo-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arimo', Arial, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.5;
+}
+
+/* ==================== ADMIN LAYOUT ==================== */
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+    width: 280px;
+    background: #405a28;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+}
+
+.sidebar-header {
+    padding: 28px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 24px;
+}
+
+.sidebar-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: #fff;
+    letter-spacing: -0.5px;
+    font-family: 'Arimo-Bold', 'Arimo', Arial, sans-serif;
+}
+
+.sidebar-header p {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin: 0;
+}
+
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 16px;
+}
+
+.sidebar-nav .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.25s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.sidebar-nav .nav-item:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.sidebar-nav .nav-item.active {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-weight: 600;
+    border-left: 3px solid #f5a623;
+}
+
+.sidebar-nav .nav-icon {
+    font-size: 1.25rem;
+    width: 28px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    padding: 20px 16px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: auto;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+.main-content {
+    flex: 1;
+    padding: 28px 32px;
+    overflow-x: auto;
+}
+
+/* ==================== HEADER ==================== */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-title h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a2e0f;
+    margin: 0 0 6px;
+    letter-spacing: -0.5px;
+    font-family: 'Arimo-Bold', 'Arimo', Arial, sans-serif;
+}
+
+.header-title p {
+    color: #888;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* ==================== BUTTONS (Đồng bộ với style.css) ==================== */
+.btn-primary {
+    background: #405a28;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-primary:hover {
+    background: #2d421c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(64,90,40,0.3);
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-icon {
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    color: #666;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-icon:hover {
+    background: #e0e0e0;
+    color: #333;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.btn-danger:hover {
+    background: #ffcdd2;
+    color: #b71c1c;
+}
+
+/* ==================== STAT CARDS ==================== */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 22px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(64,90,40,0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(64,90,40,0.15);
+    border-color: #405a28;
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.stat-icon.blue { background: #e8f0fe; color: #4361ee; }
+.stat-icon.green { background: #e8f5e9; color: #2e7d32; }
+.stat-icon.orange { background: #fff3e0; color: #ed6c02; }
+.stat-icon.purple { background: #f3e5f5; color: #9c27b0; }
+
+.stat-info h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a2e0f;
+    margin: 0;
+    font-family: 'Arimo-Bold', 'Arimo', Arial, sans-serif;
+}
+
+.stat-trend {
+    font-size: 0.7rem;
+    color: #888;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.stat-trend.up { color: #2e7d32; }
+.stat-trend.down { color: #d32f2f; }
+
+/* ==================== DATA TABLE (Đồng bộ với style.css) ==================== */
+.data-table-container {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+    border: 1px solid #e8e8e8;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 2px solid #f0f0f0;
+    background: #fafafa;
+}
+
+.table-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #405a28;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    background: #f9f9f9;
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 0.85rem;
+    vertical-align: middle;
+}
+
+.data-table tr:hover {
+    background: #f9fbf6;
+}
+
+/* ==================== BADGES (Đồng bộ với style.css) ==================== */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.status-badge.pending { background: #fff3e0; color: #ed6c02; }
+.status-badge.confirmed { background: #e3f2fd; color: #1565c0; }
+.status-badge.shipping { background: #e8eaf6; color: #3949ab; }
+.status-badge.delivered { background: #e8f5e9; color: #2e7d32; }
+.status-badge.cancelled { background: #ffebee; color: #c62828; }
+.status-badge.returned { background: #f3e5f5; color: #9c27b0; }
+
+.payment-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.payment-badge.unpaid { background: #fff3e0; color: #ed6c02; }
+.payment-badge.paid { background: #e8f5e9; color: #2e7d32; }
+.payment-badge.refunded { background: #f3e5f5; color: #9c27b0; }
+
+.stock-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.stock-badge.ok { background: #e8f5e9; color: #2e7d32; }
+.stock-badge.low { background: #fff3e0; color: #ed6c02; }
+.stock-badge.out { background: #ffebee; color: #c62828; }
+
+/* ==================== FILTER BAR ==================== */
+.filter-bar {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid #e8e8e8;
+}
+
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+}
+
+.search-form input, .search-form select {
+    padding: 9px 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+    background: #fff;
+}
+
+.search-form input:focus, .search-form select:focus {
+    border-color: #405a28;
+    box-shadow: 0 0 0 3px rgba(64,90,40,0.1);
+}
+
+/* ==================== FORM CONTAINER ==================== */
+.form-container {
+    background: #fff;
+    border-radius: 24px;
+    padding: 36px;
+    max-width: 850px;
+    margin: 0 auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e8e8e8;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.form-group label .required {
+    color: #ff3333;
+    margin-left: 3px;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    background: #fafafa;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #405a28;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(64,90,40,0.08);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* ==================== ALERT CARD ==================== */
+.alert-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 22px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    border: 1px solid #e8e8e8;
+}
+
+.alert-card.warning {
+    border-left: 4px solid #ed6c02;
+    background: #fff8e1;
+}
+
+.alert-card .alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-card .alert-content h4 {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ed6c02;
+}
+
+.alert-card .alert-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.alert-card .alert-content ul {
+    margin: 8px 0 0 20px;
+    font-size: 0.8rem;
+}
+
+/* ==================== TABLE AVATAR ==================== */
+.table-avatar {
+    width: 50px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.book-title-cell {
+    font-weight: 600;
+    color: #1a2e0f;
+}
+
+/* ==================== PAGINATION (Đồng bộ với style.css) ==================== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.pagination a {
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 30px;
+    text-decoration: none;
+    color: #405a28;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.pagination a:hover {
+    background: #405a28;
+    color: #fff;
+    border-color: #405a28;
+    transform: translateY(-2px);
+}
+
+.pagination span {
+    padding: 8px 16px;
+    color: #888;
+}
+
+/* ==================== CHART CARD ==================== */
+.chart-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chart-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e8e8e8;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #405a28;
+}
+
+.chart-select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+}
+
+/* ==================== MODAL (Đồng bộ với style.css) ==================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 20px;
+    max-width: 450px;
+    width: 100%;
+    padding: 28px;
+    animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-box h3 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    color: #1a2e0f;
+}
+
+.modal-box p {
+    margin-bottom: 24px;
+    color: #666;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* ==================== TOAST NOTIFICATION ==================== */
+.toast-success {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2e7d32;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-error {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #c62828;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 260px;
+    }
+    
+    .main-content {
+        padding: 20px 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
+    .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .sidebar-nav .nav-item {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    .main-content {
+        padding: 16px;
+    }
+    
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .data-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar-nav .nav-item {
+        font-size: 0.75rem;
+        padding: 10px 12px;
+    }
+    
+    .header-title h1 {
+        font-size: 1.3rem;
+    }
+    
+    .form-container {
+        padding: 20px;
+    }
+}

@@ -28,8 +28,10 @@ public class UserController extends HttpServlet {
         if ("logout".equals(action)) {
             HttpSession session = request.getSession(false);
             if (session != null) session.invalidate();
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
         }
-        forwardToHome(request, response);  // FORWARD thay vì redirect
+        forwardToHome(request, response);
     }
 
     @Override
@@ -38,6 +40,10 @@ public class UserController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
         if (action == null) action = "";
+        
+        System.out.println("=== UserController.doPost() ===");
+        System.out.println("Action: " + action);
+        
         switch (action) {
             case "register" -> handleRegister(request, response);
             case "login"    -> handleLogin(request, response);
@@ -99,22 +105,59 @@ public class UserController extends HttpServlet {
         String username = trim(request.getParameter("username"));
         String password = request.getParameter("password");
 
+        System.out.println("=== handleLogin ===");
+        System.out.println("Username input: " + username);
+        System.out.println("Password: " + (password != null ? "***" : "null"));
+
         if (username.isEmpty() || password == null || password.isEmpty()) {
+            System.out.println("Login failed: Empty username or password");
             request.setAttribute("loginError", "Vui lòng nhập đầy đủ thông tin.");
-            forwardToHome(request, response); return;
+            forwardToHome(request, response);
+            return;
         }
 
+        // ✅ SỬA: Lấy user bằng username hoặc email
         User user = userDAO.getUserByUsername(username);
-        if (user == null || !BCrypt.checkpw(password, user.getPassword())) {
+        if (user == null) {
+            user = userDAO.getUserByEmail(username);
+            System.out.println("Trying with email: " + username);
+        }
+        
+        if (user == null) {
+            System.out.println("Login failed: User not found - " + username);
             request.setAttribute("loginError", "Tên đăng nhập hoặc mật khẩu không đúng.");
-            forwardToHome(request, response); return;
+            forwardToHome(request, response);
+            return;
+        }
+        
+        System.out.println("User found: " + user.getUsername());
+        System.out.println("User role: " + user.getRole());
+        
+        // Kiểm tra mật khẩu
+        boolean passwordMatch = BCrypt.checkpw(password, user.getPassword());
+        System.out.println("Password match: " + passwordMatch);
+        
+        if (!passwordMatch) {
+            System.out.println("Login failed: Wrong password");
+            request.setAttribute("loginError", "Tên đăng nhập hoặc mật khẩu không đúng.");
+            forwardToHome(request, response);
+            return;
         }
 
         // Lưu user vào session
         HttpSession session = request.getSession();
         session.setAttribute("currentUser", user);
+        System.out.println("Session created for user: " + user.getUsername());
         
-        // Forward về home
+        // ✅ QUAN TRỌNG: Kiểm tra role để redirect
+        if ("admin".equals(user.getRole().name())) {
+            System.out.println("Admin user detected! Redirecting to /admin/dashboard");
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            return;
+        }
+        
+        // User thường
+        System.out.println("Regular user, forwarding to home");
         forwardToHome(request, response);
     }
 
@@ -125,6 +168,7 @@ public class UserController extends HttpServlet {
             List<Book> bestSellers = bookDAO.getBestSellers(8);
             request.setAttribute("featuredBooks", featuredBooks);
             request.setAttribute("bestSellers", bestSellers);
+            System.out.println("Books loaded: featured=" + featuredBooks.size() + ", bestSellers=" + bestSellers.size());
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("featuredBooks", new ArrayList<>());
