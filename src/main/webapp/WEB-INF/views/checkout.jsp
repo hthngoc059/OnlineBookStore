@@ -16,15 +16,15 @@
             <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
             <!--NAV LINKS -->
             <ul class="navbar__nav">
-                <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Tất cả sách</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
                 <li class="navbar__search-item">
                     <form action="${pageContext.request.contextPath}/books" method="get">
                         <input type="hidden" 
-                            name="${_csrf.parameterName}" 
-                            value="${_csrf.token}"/>
+                                name="${_csrf.parameterName}" 
+                                value="${_csrf.token}"/>
                         <input type="hidden" name="action" value="search">
                         <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
                         <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
@@ -42,7 +42,7 @@
                                 <span class="cart-count">${sessionScope.cartCount}</span>
                             </c:if>
                         </a>
-                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
                             <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
                           
                         </a>
@@ -138,7 +138,7 @@
               <div class="no-address">
                 <i class="bi bi-house-slash"></i>
                 Bạn chưa có địa chỉ giao hàng nào.<br/>
-                <a href="${pageContext.request.contextPath}/profile/addresses"
+                <a href="${pageContext.request.contextPath}/profile?action=addresses"
                    class="btn-add-addr" style="margin-top:12px;">
                   <i class="bi bi-plus"></i> Thêm địa chỉ
                 </a>
@@ -303,9 +303,27 @@
 </div>
 
 <footer>
-  <p>© 2024 BookStore. All rights reserved.</p>
+  <div class="footer__inner">
+    <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
+    <div class="footer__social">
+      <span class="footer__social-label">Theo dõi chúng tôi</span>
+      <div class="footer__social-links">
+        <a href="#" class="footer__social-btn" title="Facebook">
+          <i class="bi bi-facebook"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Instagram">
+          <i class="bi bi-instagram"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Zalo">
+          <i class="bi bi-chat-dots-fill"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="YouTube">
+          <i class="bi bi-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </div>
 </footer>
-
 <script>
   const RAW_TOTAL = ${totalAmount};
   const CSRF_TOKEN_NAME = "${_csrf.parameterName}";
@@ -329,7 +347,10 @@
       showMsg(msg, 'err', 'Vui lòng nhập mã giảm giá');
       return;
     }
-
+    if (appliedDiscountId !== null) {
+        showErrorModal('Bạn đã áp dụng mã giảm giá rồi. Vui lòng đặt hàng để sử dụng.');
+        return;
+    }
     // Loading state
     btn.disabled = true;
     btn.textContent = 'Đang kiểm tra...';
@@ -372,13 +393,12 @@
       } else {
         appliedDiscount   = 0;
         appliedDiscountId = null;
-        // Xoá hidden input nếu có
         const old = document.getElementById('hiddenDiscountId');
         if (old) old.remove();
 
-        showMsg(msg, 'err', '❌ ' + (data.message || 'Mã không hợp lệ hoặc đã hết hạn'));
+        showErrorModal(data.message || 'Mã không hợp lệ hoặc đã hết hạn');
         updateTotals();
-      }
+    }
 
     } catch (err) {
       showMsg(msg, 'err', '❌ Lỗi kết nối, vui lòng thử lại');
@@ -420,7 +440,33 @@
     const modal = document.getElementById('voucherModal');
     if (modal) modal.classList.remove('show');
   }
+  function showErrorModal(message) {
+    let modal = document.getElementById('voucherErrorModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'voucherErrorModal';
+        modal.innerHTML = `
+            <div class="voucher-modal-overlay" onclick="closeErrorModal()"></div>
+            <div class="voucher-modal-box">
+                <div class="voucher-modal-icon" style="color:#cc0000;">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <h3 style="color:#cc0000;">Không thể áp dụng mã!</h3>
+                <p id="voucherErrorDesc"></p>
+                <button class="btn-voucher-close" 
+                        style="background:#cc0000;" 
+                        onclick="closeErrorModal()">Đóng</button>
+            </div>`;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('voucherErrorDesc').textContent = message;
+    modal.classList.add('show');
+}
 
+function closeErrorModal() {
+    const modal = document.getElementById('voucherErrorModal');
+    if (modal) modal.classList.remove('show');
+}
   function updateTotals() {
     const final_ = Math.max(0, RAW_TOTAL - appliedDiscount);
     document.getElementById('totalDisplay').textContent = fmtNum(final_) + 'đ';

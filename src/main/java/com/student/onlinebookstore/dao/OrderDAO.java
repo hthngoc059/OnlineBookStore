@@ -25,22 +25,32 @@ public class OrderDAO {
     private static final String SQL_ADD_ORDER_ITEM = 
         "INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES (?, ?, ?, ?)";
     
-    private static final String SQL_GET_ORDER_BY_ID = 
-        "SELECT * FROM orders WHERE order_id = ?";
+    private static final String SQL_GET_ORDER_BY_ID =
+        "SELECT o.*, " +
+        "a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o " +
+        "LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "WHERE o.order_id = ?";
     
     private static final String SQL_GET_ORDER_ITEMS = 
         "SELECT oi.*, b.title, b.author, b.cover_image_url " +
         "FROM order_items oi JOIN books b ON oi.book_id = b.book_id " +
         "WHERE oi.order_id = ?";
     
-    private static final String SQL_GET_ORDERS_BY_USER = 
-        "SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC LIMIT ? OFFSET ?";
-    
-    private static final String SQL_GET_ALL_ORDERS = 
-        "SELECT * FROM orders ORDER BY order_date DESC LIMIT ? OFFSET ?";
-    
-    private static final String SQL_GET_ORDERS_BY_STATUS = 
-        "SELECT * FROM orders WHERE status = ? ORDER BY order_date DESC LIMIT ? OFFSET ?";
+    private static final String SQL_GET_ORDERS_BY_USER =
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "WHERE o.user_id = ? ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+
+    private static final String SQL_GET_ALL_ORDERS =
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+
+    private static final String SQL_GET_ORDERS_BY_STATUS =
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "WHERE o.status = ? ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
     
     private static final String SQL_UPDATE_ORDER_STATUS = 
         "UPDATE orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
@@ -373,8 +383,13 @@ public class OrderDAO {
 
         Address address = new Address();
         address.setAddressId(rs.getInt("address_id"));
+        address.setFullName(rs.getString("full_name"));
+        address.setPhone(rs.getString("phone"));
+        address.setAddressLine(rs.getString("address_line"));
+        address.setWard(rs.getString("ward"));
+        address.setDistrict(rs.getString("district"));
+        address.setCity(rs.getString("city"));
         order.setAddress(address);
-        // ✅ KẾT THÚC THÊM
 
         if (rs.getTimestamp("updated_at") != null) {
             order.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());

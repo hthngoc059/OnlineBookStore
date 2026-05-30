@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Home Page</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
     </head>
     <body>
         <nav class="navbar">
@@ -15,8 +16,8 @@
             <ul class="navbar__nav">
                 <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
                 <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
                 <li class="navbar__search-item">
                     <form action="${pageContext.request.contextPath}/books" method="get">
                         <input type="hidden" 
@@ -39,7 +40,7 @@
                                 <span class="cart-count">${sessionScope.cartCount}</span>
                             </c:if>
                         </a>
-                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
                             <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
                           
                         </a>
@@ -81,6 +82,18 @@
                         </c:choose>
             </div>
         </nav>
+        <section class="about-hero">
+            <div class="about-hero__bg"></div>
+            <div class="about-hero__content">
+              <h1 class="about-hero__title">Nơi mỗi trang sách<br>là một cuộc hành trình</h1>
+              <p class="about-hero__sub">
+                storyshop ra đời từ niềm đam mê đọc sách và mong muốn mang tri thức đến gần hơn với mọi người.
+              </p>
+              <a href="${pageContext.request.contextPath}/books" class="about-hero__btn">
+                Khám phá kho sách <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </section>
         <main class="books-container">
             <div class="section-header">
                 <h2 class="section-title">Sách  Nổi Bật</h2>
@@ -107,7 +120,7 @@
                                 <div class="book-info">
                                     <h3 class="book-title">${book.title}</h3>
                                     <p class="book-author">${book.author}</p>
-                                    <p class="book-price">${book.price} ₫</p>
+                                    <p class="book-price">${book.priceFormatted} ₫</p>
 
                                     <!-- Hiện badge nếu hết hàng -->
                                     <c:if test="${book.stockQuantity == 0}">
@@ -142,81 +155,90 @@
 
                 </c:otherwise>
             </c:choose>
-        </main>
-        <main class="books-container">
-            <div class="section-header">
-                <h2 class="section-title">Sách  Giảm Giá</h2>
-            </div>
-            <c:choose>
-                <c:when test="${empty bestSellers}">
-                    <div class="no-books">
-                        <p>Hiện chưa có sách nào.</p>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="books-grid">
-                        <c:forEach var="book" items="${bestSellers}">
-                            <div class="book-card">
-                                <a href="${pageContext.request.contextPath}/books?action=detail&id=${book.bookId}">
-                                    <img class="book-image"
-                                        src="${not empty book.coverImageUrl 
-                                               ? book.coverImageUrl 
-                                               : pageContext.request.contextPath.concat('/images/default-book.jpg')}"
-                                        alt="${book.title}"
-                                        onerror="this.src='${pageContext.request.contextPath}/images/default-book.jpg'">
-                                </a>
+        </main>              
+                <%-- ═══════════════════════════════════════
+                SECTION: SÁCH THEO THỂ LOẠI
+                ═══════════════════════════════════════ --%>
+           <c:if test="${not empty booksByGenre}">
+               <c:forEach var="entry" items="${booksByGenre}">
+                   <main class="books-container">
+                       <div class="section-header">
+                           <h2 class="section-title">${entry.key}</h2>
+                       </div>
+                       <div class="books-grid">
+                           <c:forEach var="book" items="${entry.value}">
+                               <div class="book-card">
+                                   <a href="${pageContext.request.contextPath}/books?action=detail&id=${book.bookId}">
+                                       <img class="book-image"
+                                            src="${not empty book.coverImageUrl
+                                                   ? book.coverImageUrl
+                                                   : pageContext.request.contextPath.concat('/images/default-book.jpg')}"
+                                            alt="${book.title}"
+                                            onerror="this.src='${pageContext.request.contextPath}/images/default-book.jpg'"/>
+                                   </a>
+                                   <div class="book-info">
+                                       <h3 class="book-title">${book.title}</h3>
+                                       <p class="book-author">${book.author}</p>
+                                       <p class="book-price">${book.priceFormatted} ₫</p>
+                                       <c:if test="${book.stockQuantity == 0}">
+                                           <span style="color:red; font-size:0.8rem;">Hết hàng</span>
+                                       </c:if>
+                                       <div class="book-actions">
+                                           <a href="${pageContext.request.contextPath}/books?action=detail&id=${book.bookId}"
+                                              class="btn-detail">Chi tiết</a>
+                                           <c:choose>
+                                               <c:when test="${book.stockQuantity > 0}">
+                                                   <a href="${pageContext.request.contextPath}/cart?action=add&id=${book.bookId}"
+                                                      class="btn-add-cart">Thêm giỏ</a>
+                                               </c:when>
+                                               <c:otherwise>
+                                                   <span class="btn-add-cart"
+                                                         style="opacity:0.4; cursor:not-allowed;">Hết hàng</span>
+                                               </c:otherwise>
+                                           </c:choose>
+                                       </div>
+                                   </div>
+                               </div>
+                           </c:forEach>
+                       </div>
 
-                                <div class="book-info">
-                                    <h3 class="book-title">${book.title}</h3>
-                                    <p class="book-author">${book.author}</p>
-                                    <p class="book-price">${book.price} ₫</p>
-
-                                    <!-- Hiện badge nếu hết hàng -->
-                                    <c:if test="${book.stockQuantity == 0}">
-                                        <span style="color:red; font-size:0.8rem;">Hết hàng</span>
-                                    </c:if>
-
-                                    <div class="book-actions">
-                                        <a href="${pageContext.request.contextPath}/books?action=detail&id=${book.bookId}"
-                                           class="btn-detail">Chi tiết</a>
-
-                                        <c:choose>
-                                            <c:when test="${book.stockQuantity > 0}">
-                                                <a href="${pageContext.request.contextPath}/cart?action=add&id=${book.bookId}"
-                                                   class="btn-add-cart">Thêm giỏ</a>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="btn-add-cart"
-                                                      style="opacity:0.4; cursor:not-allowed;">Hết hàng</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </c:forEach>
-                    </div>
-
-                    <!-- Xem thêm button -->
-                    <div class="view-more-wrapper">
-                        <a href="${pageContext.request.contextPath}/books" class="btn-view-more">Xem thêm</a>
-                    </div>
-
-                </c:otherwise>
-            </c:choose>
-        </main>                        
+                       <div class="view-more-wrapper">
+                           <a href="${pageContext.request.contextPath}/books?action=genre&name=${entry.key}"
+                              class="btn-view-more">Xem thêm ${entry.key}</a>
+                       </div>
+                   </main>
+               </c:forEach>
+           </c:if>
         <footer>
-            <p>&copy; 2024 Nhà Sách Online. All rights reserved.</p>
-        </footer>
+  <div class="footer__inner">
+    <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
+    <div class="footer__social">
+      <span class="footer__social-label">Theo dõi chúng tôi</span>
+      <div class="footer__social-links">
+        <a href="#" class="footer__social-btn" title="Facebook">
+          <i class="bi bi-facebook"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Instagram">
+          <i class="bi bi-instagram"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Zalo">
+          <i class="bi bi-chat-dots-fill"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="YouTube">
+          <i class="bi bi-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
         <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event)">
             <div class="modal-box">
 
                 <!-- LEFT: illustration panel -->
                 <div class="modal-left">
-                    <div class="modal-left-icon">📚</div>
-                    <h3>Nhà Sách Online</h3>
+                    <img src="${pageContext.request.contextPath}/images/login.png" width="100" height="100">
                     <p>Khám phá hàng nghìn đầu sách hay. Đặt hàng nhanh, giao tận nơi.</p>
-                    <span class="promo-badge">🎁 Giảm 10% đơn đầu tiên</span>
+                    <span class="promo-badge">Giảm 10% đơn đầu tiên</span>
                 </div>
 
                 <!-- RIGHT: form panel -->

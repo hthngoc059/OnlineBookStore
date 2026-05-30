@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ReviewServiceImpl implements ReviewService {
     
     private static final Logger logger = LoggerFactory.getLogger(ReviewServiceImpl.class);
@@ -26,6 +29,7 @@ public class ReviewServiceImpl implements ReviewService {
     private UserDAO userDAO;
     private BookDAO bookDAO;
     
+    @Autowired
     public ReviewServiceImpl(ReviewDAO reviewDAO, UserDAO userDAO, BookDAO bookDAO) {
         this.reviewDAO = reviewDAO;
         this.userDAO = userDAO;
@@ -70,9 +74,13 @@ public class ReviewServiceImpl implements ReviewService {
         }
         
         logger.info("Review added successfully for user {} on book {}", userId, request.getBookId());
-        
-        // Return the newly created review
-        return getReviewByUserAndBook(userId, request.getBookId());
+        ReviewResponse response = new ReviewResponse();
+        response.setRating(review.getRating());
+        response.setComment(review.getComment());
+        response.setUserId(user.getUserId());
+        response.setUsername(user.getUsername());
+        response.setBookId(book.getBookId());
+        return response;
     }
     
     @Override

@@ -320,4 +320,30 @@ public class DiscountServiceImpl implements DiscountService {
         
         return response;
     }
+    @Override
+    public Discount validateDiscountForPreview(String code) {
+        logger.info("Preview validating discount code: {}", code);
+
+        Discount discount = discountDAO.validateDiscountForPreview(code.toUpperCase());
+        if (discount == null) {
+            throw new InvalidCredentialsException("Discount code is invalid or has expired");
+        }
+
+        return discount;
+    }
+    @Override
+    public Discount validateDiscountForUser(String code, int userId) {
+        logger.info("Validating discount code: {} for user: {}", code, userId);
+
+        Discount discount = discountDAO.validateDiscountForPreview(code.toUpperCase());
+        if (discount == null) {
+            throw new InvalidCredentialsException("Mã không hợp lệ hoặc đã hết hạn");
+        }
+
+        if (discountDAO.hasUserUsedDiscount(userId, (int) discount.getDiscountId())) {
+            throw new InvalidCredentialsException("Bạn đã sử dụng mã giảm giá này rồi");
+        }
+
+        return discount;
+    }
 }

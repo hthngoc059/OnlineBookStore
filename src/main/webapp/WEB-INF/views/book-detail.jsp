@@ -9,93 +9,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${book.title} - Nhà Sách Online</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 </head>
 <body>
 
     <nav class="navbar">
-        <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
-        <ul class="navbar__nav">
-            <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-            <li><a href="${pageContext.request.contextPath}/">Tất cả sách</a></li>
-            <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-            <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
-            <li class="navbar__search-item">
-                <form action="${pageContext.request.contextPath}/books" method="get">
-                    <input type="hidden" 
-           name="${_csrf.parameterName}" 
-           value="${_csrf.token}"/>
-                    <input type="hidden" name="action" value="search">
-                    <input type="text" name="keyword" placeholder="Tìm sách..." autocomplete="off">
-                    <button type="submit">
-                        <img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/>
-                    </button>
-                </form>
-            </li>
-            <c:if test="${sessionScope.currentUser.role=='admin'}">
-                <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
-            </c:if>
-        </ul>
-        <div class="navbar__action">
-            <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
-                <img src="${pageContext.request.contextPath}/images/online-shopping.png" width="30" height="30" alt="cart"/>
-                <c:if test="${sessionScope.cartCount > 0}">
-                    <span class="cart-count">${sessionScope.cartCount}</span>
+            <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
+            <!--NAV LINKS -->
+            <ul class="navbar__nav">
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
+                <li class="navbar__search-item">
+                    <form action="${pageContext.request.contextPath}/books" method="get">
+                        <input type="hidden" 
+                                name="${_csrf.parameterName}" 
+                                value="${_csrf.token}"/>
+                        <input type="hidden" name="action" value="search">
+                        <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
+                        <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
+                    </form>
+                </li>
+                <c:if test="${sessionScope.currentUser.role=='admin'}">
+                    <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
                 </c:if>
-            </a>
-            <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
-                <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="bell"/>
-            </a>
-            <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
-                <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="orders"/>
-            </a>
-            <c:choose>
-                <c:when test="${sessionScope.currentUser != null}">
-                    <div class="user-dropdown">
-                        <div class="user-dropdown__trigger">
-                            <img src="${pageContext.request.contextPath}/images/user.png" 
-                                 width="26" height="26" alt="user"/>
-                            <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
-                            <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
-                        </div>
-                        <div class="user-dropdown__menu">
-                            <div class="user-dropdown__arrow"></div>
-                            <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
-                                <i class="bi bi-person-circle"></i>
-                                Tài khoản của tôi
-                            </a>
-                            <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
-                                <i class="bi bi-bag-check"></i>
-                                Đơn mua
-                            </a>
-                            <div class="user-dropdown__divider"></div>
-                            <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
-                                <i class="bi bi-box-arrow-right"></i>
-                                Đăng xuất
-                            </a>
-                        </div>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </nav>
-
-    <div class="detail-container">
-
-        <nav class="breadcrumb">
-            <a href="${pageContext.request.contextPath}/">Trang chủ</a>
-            <span>›</span>
-            <a href="${pageContext.request.contextPath}/books">Tất cả sách</a>
-            <span>›</span>
-            <c:forEach var="genre" items="${book.genres}" varStatus="st">
-                <a href="${pageContext.request.contextPath}/books?genre=${genre.genreId}">${genre.genreName}</a>
-                <c:if test="${!st.last}"><span>,</span></c:if>
-            </c:forEach>
-            <c:if test="${empty book.genres}"><span>Sách</span></c:if>
-            <span>›</span>
-            <span>${book.title}</span>
+            </ul>
+            <!--USER ACTION-->
+            <div class="navbar__action">
+                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                            <img src="${pageContext.request.contextPath}/images/online-shopping.png" width="30" height="30" alt="cart"/>
+                            <c:if test="${sessionScope.cartCount > 0}">
+                                <span class="cart-count">${sessionScope.cartCount}</span>
+                            </c:if>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
+                            <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
+                          
+                        </a>
+                        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
+                            <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="cart"/>
+                            
+                        </a>
+                        <c:choose>
+                            <c:when test="${sessionScope.currentUser != null}">
+                                <div class="user-dropdown">
+                                    <div class="user-dropdown__trigger">
+                                        <img src="${pageContext.request.contextPath}/images/user.png" 
+                                             width="26" height="26" alt="user"/>
+                                        <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
+                                        <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+                                    </div>
+                                    <div class="user-dropdown__menu">
+                                        <div class="user-dropdown__arrow"></div>
+                                        <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
+                                            <i class="bi bi-person-circle"></i>
+                                            Tài khoản của tôi
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
+                                            <i class="bi bi-bag-check"></i>
+                                            Đơn mua
+                                        </a>
+                                        <div class="user-dropdown__divider"></div>
+                                        <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            Đăng xuất
+                                        </a>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <%-- User is NOT logged in --%>
+                                <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
+                            </c:otherwise>    
+                        </c:choose>
+            </div>
         </nav>
 
         <div class="detail-main">
@@ -368,36 +356,28 @@
 
         <!-- Write review -->
         <div class="write-review-box">
-            <p class="write-review-title">✍️ Viết đánh giá của bạn</p>
+            <p class="write-review-title">Viết đánh giá của bạn</p>
             <c:choose>
                 <c:when test="${sessionScope.currentUser != null}">
-                    <c:if test="${not empty reviewSuccess}">
-                        <div class="modal-alert modal-alert-success">${reviewSuccess}</div>
-                    </c:if>
-                    <c:if test="${not empty reviewError}">
-                        <div class="modal-alert modal-alert-error">${reviewError}</div>
-                    </c:if>
-                    <form action="${pageContext.request.contextPath}/reviews" method="post">
-                        <input type="hidden" 
-           name="${_csrf.parameterName}" 
-           value="${_csrf.token}"/>
-                        <input type="hidden" name="action" value="add">
-                        <input type="hidden" name="bookId" value="${book.bookId}">
-                        <input type="hidden" name="rating" id="ratingInput" value="0">
+                    <div id="reviewAlert" style="display:none;"></div>
 
-                        <div class="star-picker" id="starPicker">
-                            <span class="star-pick" data-value="1">★</span>
-                            <span class="star-pick" data-value="2">★</span>
-                            <span class="star-pick" data-value="3">★</span>
-                            <span class="star-pick" data-value="4">★</span>
-                            <span class="star-pick" data-value="5">★</span>
-                        </div>
+                    <input type="hidden" id="reviewBookId"    value="${book.bookId}"/>
+                    <input type="hidden" id="reviewCsrfName"  value="${_csrf.parameterName}"/>
+                    <input type="hidden" id="reviewCsrfToken" value="${_csrf.token}"/>
+                    <input type="hidden" id="ratingInput"     value="0"/>
 
-                        <textarea class="review-textarea" name="comment"
-                                  placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
+                    <div class="star-picker" id="starPicker">
+                        <span class="star-pick" data-value="1">★</span>
+                        <span class="star-pick" data-value="2">★</span>
+                        <span class="star-pick" data-value="3">★</span>
+                        <span class="star-pick" data-value="4">★</span>
+                        <span class="star-pick" data-value="5">★</span>
+                    </div>
 
-                        <button type="submit" class="btn-submit-review">Gửi đánh giá</button>
-                    </form>
+                    <textarea class="review-textarea" id="reviewComment"
+                              placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
+
+                    <button type="button" class="btn-submit-review" onclick="submitReview()">Gửi đánh giá</button>
                 </c:when>
                 <c:otherwise>
                     <p class="login-to-review">
@@ -408,20 +388,37 @@
             </c:choose>
         </div>
     </div>
-
     <!-- ===== FOOTER ===== -->
     <footer>
-        <p>&copy; 2024 Nhà Sách Online. All rights reserved.</p>
-    </footer>
+  <div class="footer__inner">
+    <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
+    <div class="footer__social">
+      <span class="footer__social-label">Theo dõi chúng tôi</span>
+      <div class="footer__social-links">
+        <a href="#" class="footer__social-btn" title="Facebook">
+          <i class="bi bi-facebook"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Instagram">
+          <i class="bi bi-instagram"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Zalo">
+          <i class="bi bi-chat-dots-fill"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="YouTube">
+          <i class="bi bi-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
 
     <!-- ===== AUTH MODAL (same as home.jsp) ===== -->
     <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event)">
         <div class="modal-box">
             <div class="modal-left">
-                <div class="modal-left-icon">📚</div>
-                <h3>Nhà Sách Online</h3>
+                <img src="${pageContext.request.contextPath}/images/login.png" width="100" height="100">
                 <p>Khám phá hàng nghìn đầu sách hay. Đặt hàng nhanh, giao tận nơi.</p>
-                <span class="promo-badge">🎁 Giảm 10% đơn đầu tiên</span>
+                <span class="promo-badge">Giảm 10% đơn đầu tiên</span>
             </div>
             <div class="modal-right">
                 <button class="modal-close" onclick="closeModal()">✕</button>
@@ -487,7 +484,7 @@
         // ---- Data from server ----
         const MAX_QTY    = ${book.stockQuantity};
         const BOOK_ID    = ${book.bookId};
-        const AVG_RATING = ${avgRating != null ? avgRating : 0};
+        const AVG_RATING = ${not empty avgRating ? avgRating : 0};
         const CTX        = '${pageContext.request.contextPath}';
 
         // ---- Render stars helper ----
@@ -524,25 +521,24 @@
             const barsContainer = document.getElementById('ratingBars');
             if (barsContainer) {
                 const counts = {
-                    5: ${ratingCounts[5] != null ? ratingCounts[5] : 0},
-                    4: ${ratingCounts[4] != null ? ratingCounts[4] : 0},
-                    3: ${ratingCounts[3] != null ? ratingCounts[3] : 0},
-                    2: ${ratingCounts[2] != null ? ratingCounts[2] : 0},
-                    1: ${ratingCounts[1] != null ? ratingCounts[1] : 0}
+                    5: parseInt('${ratingCounts["5"]}') || 0,
+                    4: parseInt('${ratingCounts["4"]}') || 0,
+                    3: parseInt('${ratingCounts["3"]}') || 0,
+                    2: parseInt('${ratingCounts["2"]}') || 0,
+                    1: parseInt('${ratingCounts["1"]}') || 0
                 };
                 const total = Object.values(counts).reduce((a, b) => a + b, 0);
                 barsContainer.innerHTML = '';
                 [5, 4, 3, 2, 1].forEach(star => {
                     const cnt = counts[star] || 0;
                     const pct = total > 0 ? (cnt / total * 100) : 0;
-                    barsContainer.innerHTML += `
-                        <div class="rating-bar-row">
-                            <span class="rating-bar-label">${star} ★</span>
-                            <div class="rating-bar-track">
-                                <div class="rating-bar-fill" style="width:${pct}%"></div>
-                            </div>
-                            <span class="rating-bar-count">${cnt}</span>
-                        </div>`;
+                    barsContainer.innerHTML += '<div class="rating-bar-row">'
+                        + '<span class="rating-bar-label">' + star + ' ★</span>'
+                        + '<div class="rating-bar-track">'
+                        + '<div class="rating-bar-fill" style="width:' + pct + '%"></div>'
+                        + '</div>'
+                        + '<span class="rating-bar-count">' + cnt + '</span>'
+                        + '</div>';
                 });
             }
 
@@ -644,33 +640,98 @@
             if (modal) modal.style.display = 'none';
         });
         async function toggleWishlist(bookId, btn) {
-        const inWishlist = btn.classList.contains('active');
-        const action = inWishlist ? 'remove' : 'add';
+            const inWishlist = btn.classList.contains('active');
+            const action = inWishlist ? 'remove' : 'add';
 
-        const params = new URLSearchParams();
-        params.append('${_csrf.parameterName}', '${_csrf.token}');
+            const params = new URLSearchParams();
+            params.append('${_csrf.parameterName}', '${_csrf.token}');
 
-        if (action === 'add') {
-          params.append('bookId', bookId);
-        } else {
-          // Cần wishlistItemId — lấy từ data attribute
-          params.append('itemId', btn.dataset.itemId);
+            if (action === 'add') {
+                params.append('bookId', bookId);
+            } else {
+                params.append('itemId', btn.dataset.itemId);
+            }
+
+            const resp = await fetch(CTX + '/wishlist?action=' + action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                btn.classList.toggle('active');
+                btn.innerHTML = btn.classList.contains('active')
+                    ? '<i class="bi bi-heart-fill"></i> Đã yêu thích'
+                    : '<i class="bi bi-heart"></i> Yêu thích';
+            }
+        } // <-- đóng toggleWishlist đúng chỗ
+
+        async function submitReview() {
+            const rating    = parseInt(document.getElementById('ratingInput').value);
+            const comment   = document.getElementById('reviewComment').value.trim();
+            const bookId    = document.getElementById('reviewBookId').value;
+            const csrfName  = document.getElementById('reviewCsrfName').value;
+            const csrfToken = document.getElementById('reviewCsrfToken').value;
+            const alertEl   = document.getElementById('reviewAlert');
+
+            if (!rating || rating < 1) {
+                alertEl.className   = 'modal-alert modal-alert-error';
+                alertEl.textContent = 'Vui lòng chọn số sao đánh giá';
+                alertEl.style.display = 'block';
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append(csrfName, csrfToken);
+            params.append('action',  'add');
+            params.append('bookId',  bookId);
+            params.append('rating',  rating);
+            params.append('comment', comment);
+
+            const res  = await fetch(CTX + '/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const reviewList = document.querySelector('.review-list');
+                const initial = data.username ? data.username.charAt(0).toUpperCase() : '?';
+                const stars = [1,2,3,4,5].map(function(i) {
+                    return '<span class="star ' + (i <= data.rating ? 'filled' : '') + '">★</span>';
+                }).join('');
+                const newCard = '<div class="review-card">'
+                    + '<div class="review-card-header">'
+                    + '<div class="reviewer-avatar">' + initial + '</div>'
+                    + '<div class="reviewer-info">'
+                    + '<div class="reviewer-name">' + data.username + '</div>'
+                    + '<div class="reviewer-date">Vừa xong</div>'
+                    + '</div>'
+                    + '<div class="review-stars">' + stars + '</div>'
+                    + '</div>'
+                    + (data.comment ? '<p class="review-comment">' + data.comment + '</p>' : '')
+                    + '</div>';
+                reviewList.insertAdjacentHTML('afterbegin', newCard);
+
+                const avg = parseFloat(data.avgRating).toFixed(1);
+                document.getElementById('avgScoreBig').textContent = avg;
+                document.getElementById('ratingScore').textContent = avg + '/5';
+                renderStars(document.getElementById('starsDisplay'), data.avgRating);
+                renderStars(document.getElementById('avgStarsBig'),  data.avgRating, '1.1rem');
+                document.querySelector('.rating-count').textContent = '(' + data.reviewCount + ' đánh giá)';
+                document.querySelector('.review-score-big .total').textContent = data.reviewCount + ' đánh giá';
+
+                document.querySelector('.write-review-box').innerHTML =
+                    '<p style="color:#1a7a3c;font-weight:600;padding:10px;">Cảm ơn bạn đã đánh giá!</p>';
+
+            } else {
+                alertEl.className   = 'modal-alert modal-alert-error';
+                alertEl.textContent = data.message || 'Có lỗi xảy ra, vui lòng thử lại';
+                alertEl.style.display = 'block';
+            }
         }
-
-        const resp = await fetch(CTX + '/wishlist?action=' + action, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params.toString()
-        });
-        const data = await resp.json();
-
-        if (data.success) {
-          btn.classList.toggle('active');
-          btn.innerHTML = btn.classList.contains('active')
-            ? '<i class="bi bi-heart-fill"></i> Đã yêu thích'
-            : '<i class="bi bi-heart"></i> Yêu thích';
-        }
-      }
     </script>
 <script>
 (function() {

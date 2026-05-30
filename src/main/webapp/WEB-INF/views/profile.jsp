@@ -14,10 +14,10 @@
             <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
             <!--NAV LINKS -->
             <ul class="navbar__nav">
-                <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Tất cả sách</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
                 <li class="navbar__search-item">
                     <form action="${pageContext.request.contextPath}/books" method="get">
                         <input type="hidden" 
@@ -40,7 +40,7 @@
                                 <span class="cart-count">${sessionScope.cartCount}</span>
                             </c:if>
                         </a>
-                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
                             <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
                           
                         </a>
@@ -107,10 +107,10 @@
                    class="profile-nav-item ${param.action == 'password' ? 'active' : ''}">
                     Đổi mật khẩu
                 </a>
-                <a href="${pageContext.request.contextPath}/profile/addresses"
-                   class="profile-nav-item">
-                    Địa chỉ
-                </a>
+                <a href="${pageContext.request.contextPath}/profile?action=addresses"
+                    class="profile-nav-item ${param.action == 'addresses' ? 'active' : ''}">
+                     Địa chỉ
+                 </a>
             </div>
             <a href="${pageContext.request.contextPath}/orders" class="profile-nav-group-link">
                 <i class="bi bi-bag-check"></i> Đơn mua
@@ -203,7 +203,102 @@
                 }
                 </script>
             </c:when>
+            <%-- ── TAB: ĐỊA CHỈ ── --%>
+<c:when test="${param.action == 'addresses'}">
+    <h2 class="profile-title">Địa chỉ của tôi</h2>
+    <p style="color:#888; font-size:0.85rem; margin-bottom:0;
+              border-bottom:1px solid #f0f0f0; padding-bottom:16px; margin-bottom:0;">
+        Quản lý địa chỉ giao hàng của bạn
+    </p>
 
+    <c:if test="${not empty successMsg}">
+        <div class="profile-alert profile-alert--ok" style="margin-top:20px;">✅ ${successMsg}</div>
+    </c:if>
+    <c:if test="${not empty errorMsg}">
+        <div class="profile-alert profile-alert--err" style="margin-top:20px;">❌ ${errorMsg}</div>
+    </c:if>
+
+    <%-- Header: tiêu đề + nút thêm --%>
+    <div class="addr-mgmt-header" style="margin-top:20px;">
+        <h2 style="font-size:0.9rem; color:#888; font-weight:600; margin:0;">
+            ${empty addresses ? '0' : addresses.size()} địa chỉ đã lưu
+        </h2>
+        <a href="${pageContext.request.contextPath}/address" class="btn-add-address">
+            <i class="bi bi-plus-lg"></i> Thêm địa chỉ mới
+        </a>
+    </div>
+
+    <%-- Danh sách địa chỉ --%>
+    <c:choose>
+        <c:when test="${empty addresses}">
+            <div class="addr-empty">
+                <i class="bi bi-geo-alt"></i>
+                <p>Bạn chưa có địa chỉ nào.</p>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="addr-list">
+                <c:forEach var="addr" items="${addresses}">
+                    <div class="addr-item">
+                        <div class="addr-info">
+                            <div class="addr-name-phone">
+                                <span class="addr-name">${addr.fullName}</span>
+                                <span class="addr-divider">|</span>
+                                <span class="addr-phone">(+84) ${addr.phone}</span>
+                            </div>
+                            <div class="addr-line">
+                                ${addr.addressLine}<br/>
+                                ${addr.ward}, ${addr.district}, ${addr.city}
+                            </div>
+                            <c:if test="${addr.isDefault}">
+                                <div class="addr-tags">
+                                    <span class="addr-tag">
+                                        <i class="bi bi-star-fill" style="font-size:0.65rem;"></i>
+                                        Mặc định
+                                    </span>
+                                    <span class="addr-tag addr-tag--pickup">Địa chỉ lấy hàng</span>
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <div class="addr-actions">
+                            <div class="addr-action-links">
+                                <a href="${pageContext.request.contextPath}/address?action=edit&id=${addr.addressId}"
+                                   class="btn-addr-edit">
+                                    <i class="bi bi-pencil"></i> Sửa
+                                </a>
+                                <c:if test="${!addr.isDefault}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/profile?action=deleteAddress"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                                        <input type="hidden" name="action" value="deleteAddress"/>
+                                        <input type="hidden" name="addressId" value="${addr.addressId}"/>
+                                        <button type="submit" class="btn-addr-delete">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </c:if>
+                            </div>
+                            <c:if test="${!addr.isDefault}">
+                                <form method="post"
+                                      action="${pageContext.request.contextPath}/profile?action=setDefault">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                                    <input type="hidden" name="action" value="setDefault"/>
+                                    <input type="hidden" name="addressId" value="${addr.addressId}"/>
+                                    <button type="submit" class="btn-set-default">
+                                        <i class="bi bi-star"></i> Đặt mặc định
+                                    </button>
+                                </form>
+                            </c:if>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </c:otherwise>
+    </c:choose>
+</c:when>
             <%-- ── TAB: HỒ SƠ (mặc định) ── --%>
             <c:otherwise>
                 <h2 class="profile-title">Hồ Sơ Của Tôi</h2>
@@ -258,7 +353,26 @@
 </div>
 
 <footer>
-    <p>&copy; 2024 Nhà Sách Online. All rights reserved.</p>
+  <div class="footer__inner">
+    <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
+    <div class="footer__social">
+      <span class="footer__social-label">Theo dõi chúng tôi</span>
+      <div class="footer__social-links">
+        <a href="#" class="footer__social-btn" title="Facebook">
+          <i class="bi bi-facebook"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Instagram">
+          <i class="bi bi-instagram"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Zalo">
+          <i class="bi bi-chat-dots-fill"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="YouTube">
+          <i class="bi bi-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </div>
 </footer>
 <script>
 (function() {

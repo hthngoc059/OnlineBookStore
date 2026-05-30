@@ -21,6 +21,8 @@ public interface DiscountService {
     
     // Discount application
     Discount validateDiscount(String code);
+    Discount validateDiscountForPreview(String code);
+    Discount validateDiscountForUser(String code, int userId);
     BigDecimal calculateDiscount(BigDecimal originalAmount, Discount discount);
     BigDecimal applyDiscountToOrder(Integer orderId, String discountCode);
     boolean applyDiscount(Integer discountId);
@@ -29,4 +31,5 @@ public interface DiscountService {
     boolean addBookToDiscount(Integer discountId, Integer bookId);
     boolean removeBookFromDiscount(Integer discountId, Integer bookId);
     PaginationResponse getBooksByDiscount(Integer discountId, int page, int size);
+    
 }

@@ -61,6 +61,21 @@ public class DiscountDAO {
         "SELECT * FROM discounts WHERE code = ? AND is_active = true AND start_date <= NOW() AND end_date >= NOW() " +
         "AND (max_usage IS NULL OR used_count < max_usage)";
     
+    private static final String SQL_VALIDATE_DISCOUNT_PREVIEW = 
+        "SELECT * FROM discounts WHERE code = ? AND is_active = true " +
+        "AND start_date <= NOW() AND end_date >= NOW()";
+
+    public Discount validateDiscountForPreview(String code) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_VALIDATE_DISCOUNT_PREVIEW)) {
+            pstmt.setString(1, code);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return mapResultSetToDiscount(rs);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+    
     private static final String SQL_INCREMENT_USED_COUNT = 
         "UPDATE discounts SET used_count = used_count + 1 WHERE discount_id = ?";
     
@@ -69,7 +84,33 @@ public class DiscountDAO {
     
     private static final String SQL_COUNT_ACTIVE_DISCOUNTS = 
         "SELECT COUNT(*) FROM discounts WHERE is_active = true AND start_date <= NOW() AND end_date >= NOW()";
-    
+    private static final String SQL_CHECK_USER_USED_DISCOUNT =
+        "SELECT COUNT(*) FROM user_discount_usage WHERE user_id = ? AND discount_id = ?";
+
+    private static final String SQL_SAVE_USER_DISCOUNT_USAGE =
+        "INSERT INTO user_discount_usage (user_id, discount_id) VALUES (?, ?)";
+
+    public boolean hasUserUsedDiscount(int userId, int discountId) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_CHECK_USER_USED_DISCOUNT)) {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, discountId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean saveUserDiscountUsage(int userId, int discountId) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_SAVE_USER_DISCOUNT_USAGE)) {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, discountId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
     // Create discount
     public boolean createDiscount(Discount discount) {
         try (Connection conn = DBConnection.getConnection();
