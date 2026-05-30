@@ -45,7 +45,7 @@
             <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
                 <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="bell"/>
             </a>
-            <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+            <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
                 <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="orders"/>
             </a>
             <c:choose>
@@ -108,30 +108,24 @@
                      alt="${book.title}"
                      onerror="this.src='${pageContext.request.contextPath}/images/default-book.jpg'">
 
-                <div class="detail-cover-actions">
-                    <c:choose>
-                        <c:when test="${sessionScope.currentUser != null}">
-                            <form action="${pageContext.request.contextPath}/wishlist" method="post" style="flex:1;">
-                                <input type="hidden" 
-           name="${_csrf.parameterName}" 
-           value="${_csrf.token}"/>
-                                <input type="hidden" name="action" value="toggle">
-                                <input type="hidden" name="bookId" value="${book.bookId}">
-                                <button type="submit" class="btn-wishlist ${inWishlist ? 'active' : ''}">
-                                    <span>${inWishlist ? '♥' : '♡'}</span>
-                                    ${inWishlist ? 'Đã yêu thích' : 'Yêu thích'}
-                                </button>
-                            </form>
-                        </c:when>
-                        <c:otherwise>
-                            <button class="btn-wishlist" onclick="openModal('login')" style="flex:1;">
-                                ♡ Yêu thích
-                            </button>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
+                                <div class="detail-cover-actions">
+                                    <c:choose>
+                                        <c:when test="${sessionScope.currentUser != null}">
+                                            <button class="btn-wishlist ${inWishlist ? 'active' : ''}" 
+                                                    onclick="toggleWishlist(${book.bookId}, this)"
+                                                    data-item-id="${wishlistItemId}">
+                                                <span>${inWishlist ? '♥' : '♡'}</span>
+                                                ${inWishlist ? 'Đã yêu thích' : 'Yêu thích'}
+                                            </button>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <button class="btn-wishlist" onclick="openModal('login')" style="flex:1;">
+                                                ♡ Yêu thích
+                                            </button>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
             </div>
-
             <div class="detail-info">
 
                 <div class="detail-genres">
@@ -649,6 +643,34 @@
             var modal = document.getElementById('authModal');
             if (modal) modal.style.display = 'none';
         });
+        async function toggleWishlist(bookId, btn) {
+        const inWishlist = btn.classList.contains('active');
+        const action = inWishlist ? 'remove' : 'add';
+
+        const params = new URLSearchParams();
+        params.append('${_csrf.parameterName}', '${_csrf.token}');
+
+        if (action === 'add') {
+          params.append('bookId', bookId);
+        } else {
+          // Cần wishlistItemId — lấy từ data attribute
+          params.append('itemId', btn.dataset.itemId);
+        }
+
+        const resp = await fetch(CTX + '/wishlist?action=' + action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+          btn.classList.toggle('active');
+          btn.innerHTML = btn.classList.contains('active')
+            ? '<i class="bi bi-heart-fill"></i> Đã yêu thích'
+            : '<i class="bi bi-heart"></i> Yêu thích';
+        }
+      }
     </script>
 <script>
 (function() {

@@ -345,4 +345,20 @@ public class UserDAO {
         }
         return user;
     }
+    public boolean updatePhoneNumber(int userId, String phoneNumber) {
+        String sql = "UPDATE users SET phone_number = ?, updated_at = NOW() WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, phoneNumber);
+            pstmt.setInt(2, userId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 }

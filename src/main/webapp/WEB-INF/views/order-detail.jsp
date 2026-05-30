@@ -260,7 +260,7 @@
 </footer>
 
 <!-- ===== MODAL ĐẶT HÀNG THÀNH CÔNG ===== -->
-<c:if test="${justPlaced == true}">
+<c:if test="${justPlaced}">
 <div id="successModal" style="display:flex; position:fixed; inset:0;
      background:rgba(0,0,0,0.52); z-index:9999;
      align-items:center; justify-content:center; padding:20px;">

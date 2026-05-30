@@ -14,7 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class WishlistServiceImpl implements WishlistService {
     
     private static final Logger logger = LoggerFactory.getLogger(WishlistServiceImpl.class);
@@ -23,6 +26,7 @@ public class WishlistServiceImpl implements WishlistService {
     private CartDAO cartDAO;
     private BookDAO bookDAO;
     
+    @Autowired
     public WishlistServiceImpl(WishlistDAO wishlistDAO, CartDAO cartDAO, BookDAO bookDAO) {
         this.wishlistDAO = wishlistDAO;
         this.cartDAO = cartDAO;
@@ -114,7 +118,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     public int getWishlistCount(Integer userId) {
         WishlistResponse wishlist = getWishlist(userId);
-        return wishlist.getTotalItems();
+        return wishlist.getItems().size();
     }
     
     @Override
@@ -174,5 +178,10 @@ public class WishlistServiceImpl implements WishlistService {
         response.setAddedAt(item.getAddedAt());
         
         return response;
+    }
+    @Override
+    public Integer getWishlistItemId(Integer userId, Integer bookId) {
+        int wishlistId = wishlistDAO.getOrCreateWishlist(userId);
+        return wishlistDAO.getWishlistItemId(wishlistId, bookId);
     }
 }

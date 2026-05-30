@@ -139,6 +139,7 @@ public class BookController extends HttpServlet {
             request.setAttribute("featuredBooks", new ArrayList<>());
             request.setAttribute("bestSellers", new ArrayList<>());
         }
-        request.getRequestDispatcher("/WEB-INF/views/home.jsp").forward(request, response);
+        request.setAttribute("keyword", keyword);
+        request.getRequestDispatcher("/WEB-INF/views/search.jsp").forward(request, response);
     }
 }

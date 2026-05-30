@@ -6,7 +6,9 @@ import com.student.onlinebookstore.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class WishlistDAO {
     // SQL Queries
     private static final String SQL_GET_OR_CREATE_WISHLIST = 
@@ -30,23 +32,31 @@ public class WishlistDAO {
     
     // Get or create wishlist for user
     public int getOrCreateWishlist(int userId) {
+
+        String insertSql =
+            "INSERT INTO wishlists (user_id) VALUES (?) " +
+            "ON DUPLICATE KEY UPDATE wishlist_id = LAST_INSERT_ID(wishlist_id)";
+
         int wishlistId = -1;
-        
+
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_OR_CREATE_WISHLIST, Statement.RETURN_GENERATED_KEYS)) {
-            
+             PreparedStatement pstmt = conn.prepareStatement(
+                     insertSql,
+                     Statement.RETURN_GENERATED_KEYS)) {
+
             pstmt.setInt(1, userId);
             pstmt.executeUpdate();
-            
+
             ResultSet rs = pstmt.getGeneratedKeys();
+
             if (rs.next()) {
                 wishlistId = rs.getInt(1);
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return wishlistId;
     }
     
@@ -141,5 +151,20 @@ public class WishlistDAO {
         }
         
         return exists;
+    }
+    public Integer getWishlistItemId(int wishlistId, int bookId) {
+        String sql = "SELECT wishlist_item_id FROM wishlist_items WHERE wishlist_id = ? AND book_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, wishlistId);
+            pstmt.setInt(2, bookId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("wishlist_item_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
