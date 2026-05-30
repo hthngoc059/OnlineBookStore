@@ -1,7 +1,7 @@
 USE bookstore_management;
 
 INSERT INTO users (username, email, password, phone_number, role) VALUES
-('admin', 'admin@gmail.com', '$2a$10$BjL2FQTAQorfUpc2xgag/.sJAbqy9ZLGCxCo.taFRs22XqWEcz5.y', '0987654321', 'admin'),
+('admin', 'admin@gmail.com', '$2a$10$BjL2FQTAQorfUpc2xgag/.sJAbqy9ZLGCxCo.taFRs22XqWEcz5.y', '0987654321', 'admin'), -- Password: Admin@123
 ('john_doe', 'john@gmail.com', '$2a$10$BjL2FQTAQorfUpc2xgag/.sJAbqy9ZLGCxCo.taFRs22XqWEcz5.y', '0901234567', 'user'),
 ('lisa_tran', 'lisa@gmail.com', '$2a$10$BjL2FQTAQorfUpc2xgag/.sJAbqy9ZLGCxCo.taFRs22XqWEcz5.y', '0934567890', 'user'),
 ('mike_nguyen', 'mike@gmail.com', '$2a$10$BjL2FQTAQorfUpc2xgag/.sJAbqy9ZLGCxCo.taFRs22XqWEcz5.y', '0912345678', 'user'),
@@ -34,7 +34,8 @@ INSERT INTO books (cover_image_url, title, author, description, ISBN, publisher,
 ('https://i.ibb.co/mV2bnk5y/phomat.webp', 'Ai Lấy Miếng Pho Mát Của Tôi', 'Spencer Johnson', 'Câu chuyện về sự thay đổi trong công việc và cuộc sống', '8935270703554', 'NXB Tổng hợp thành phố HCM', 2021, 'Tiếng Việt', 68000, 180, 'ai-lay-mat-mieng-pho-mat', 'paperback', TRUE),
 ('https://i.ibb.co/nNJp4gfq/luoc-su-loai-nguoi.webp', 'Sapiens: Lược Sử Loài Người', 'Yuval Noah Harari', 'Hành trình phát triển của nhân loại từ thời tiền sử', '9780062316097', 'NXB Tri Thức', 2022, 'Tiếng Việt', 299000, 65, 'sapiens-luoc-su-loai-nguoi', 'paperback', TRUE),
 ('https://i.ibb.co/0VVBnhz0/doraemon-tap-1.webp', 'Doraemon Tập 1', 'Fujiko F. Fujio', 'Chú mèo máy đến từ tương lai với những bảo bối kỳ diệu', '8935235210561', 'NXB Kim Đồng', 2023, 'Tiếng Việt', 22000, 300, 'doraemon-tap-1', 'paperback', TRUE),
-('https://i.ibb.co/MDLK56pX/tieng-anh-gen-z.webp', 'Tiếng Anh Gen Z Trong Giao Tiếp - Tiếng Anh Giao Tiếp Dễ Nhớ Cho Người Lười', 'Châm', 'Tiếng Anh Gen Z Trong Giao Tiếp - Tiếng Anh Giao Tiếp Dễ Nhớ Cho Người Lười', '8935246940129', 'NXB Dân Trí', 2025, 'Tiếng Việt', 135000, 140, 'tieng-anh-gen-z', 'paperback', TRUE);
+('https://i.ibb.co/MDLK56pX/tieng-anh-gen-z.webp', 'Tiếng Anh Gen Z Trong Giao Tiếp - Tiếng Anh Giao Tiếp Dễ Nhớ Cho Người Lười', 'Châm', 'Tiếng Anh Gen Z Trong Giao Tiếp - Tiếng Anh Giao Tiếp Dễ Nhớ Cho Người Lười', '8935246940129', 'NXB Dân Trí', 2025, 'Tiếng Việt', 135000, 140, 'tieng-anh-gen-z', 'paperback', TRUE),
+('https://i.ibb.co/x8590kBY/ho-diep-va-kinh-ngu-17307-1.webp', 'Hồ Điệp Và Kình Ngư', 'Tuế Kiến', 'Một cô gái trẻ đang sống một cuộc đời bình thường nhưng lại vô tình bị cuốn vào thế giới đen tối đầy bí ẩn của một người đàn ông nguy hiểm nhưng đầy cuốn hút. Anh là kẻ đứng trên đỉnh cao quyền lực, là người mà cô không nên yêu. Nhưng càng muốn trốn chạy, càng không thể thoát.', '8935212370189', 'NXB Văn Học', 2024, 'Tiếng Việt', 155000, 10, 'ho-diep-va-kinh-ngu', 'paperback', TRUE);
 
 INSERT INTO book_genre (book_id, genre_id) VALUES 
 (1, 5), 
@@ -51,7 +52,8 @@ INSERT INTO book_genre (book_id, genre_id) VALUES
 (12, 5),
 (13, 2), (13, 6),
 (14, 1), (14, 4),
-(15, 10);
+(15, 10),
+(16, 2);
 
 INSERT INTO wishlists (user_id) VALUES (2), (3);
 INSERT INTO wishlists (user_id) VALUES (4), (5);
@@ -94,42 +96,40 @@ INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
 (3, 4, 1, 92000);
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(4, 1, 2, 86000),   -- Đắc Nhân Tâm x2
-(4, 2, 1, 95000);   -- Nhà Giả Kim
+(4, 1, 2, 86000),  
+(4, 2, 1, 95000);   
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(5, 7, 1, 148000),  -- 7 Thói Quen Hiệu Quả
-(5, 12, 1, 68000);  -- Cá Và Chuột
+(5, 7, 1, 148000),  
+(5, 12, 1, 68000); 
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(6, 10, 1, 850000); -- Clean Code
+(6, 10, 1, 850000); 
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(7, 14, 3, 25000),  -- Doraemon Tập 1 x3
-(7, 9, 1, 89000);   -- Sống Vốn Đơn Thuần 
+(7, 14, 3, 25000),  
+(7, 9, 1, 89000);   
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(8, 11, 1, 125000); -- Mật Mã Da Vinci
+(8, 11, 1, 125000); 
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(9, 5, 2, 120000);  -- 3000 Từ Vựng Tiếng Trung x2
+(9, 5, 2, 120000); 
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(10, 12, 1, 68000); -- Cá Và Chuột
+(10, 12, 1, 68000); 
 
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(11, 13, 1, 210000), -- Sapiens
-(11, 14, 2, 25000),  -- Doraemon x2
-(11, 6, 1, 160000);  -- Harry Potter 2
+(11, 13, 1, 210000), 
+(11, 14, 2, 25000),  
+(11, 6, 1, 160000);  
 
--- Order 12: User 2 mua 1 sách Nghĩ Giàu Làm Giàu (8)
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(12, 8, 1, 99000);  -- Nghĩ Giàu Làm Giàu
+(12, 8, 1, 99000);  
 
--- Order 13: User 3 mua 1 sách Harry Potter 1 (4), 2 sách Atomic Habits (3)
 INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES
-(13, 4, 1, 150000),  -- Harry Potter 1
-(13, 3, 2, 628000);  -- Atomic Habits x2
+(13, 4, 1, 150000),  
+(13, 3, 2, 628000);  
 
 INSERT INTO carts (user_id) VALUES (2), (3);
 
@@ -166,9 +166,9 @@ INSERT INTO reviews (user_id, book_id, rating, comment) VALUES
 (2, 8, 4, 'Nghĩ Giàu Làm Giàu có nhiều nguyên lý giá trị, nhưng cách viết hơi cũ. Tuy nhiên các bài học vẫn còn nguyên giá trị.');
 
 INSERT INTO discounts (code, description, discount_type, discount_value, start_date, end_date, max_usage, used_count, is_active) VALUES
-('WELCOME10', 'Giảm 10% cho đơn hàng đầu tiên', 'percent', 10, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 1000, 245, TRUE),
-('SUMMER50', 'Giảm 50k cho đơn từ 300k', 'fixed', 50000, '2024-06-01 00:00:00', '2024-08-31 23:59:59', 500, 89, TRUE),
-('AUTUMN20', 'Giảm 20% toàn bộ sách văn học', 'percent', 20, '2025-09-01 00:00:00', '2025-10-31 23:59:59', 300, 45, TRUE),
+('WELCOME10', 'Giảm 10% cho đơn hàng đầu tiên', 'percent', 10, '2024-01-01 00:00:00', '2027-12-31 23:59:59', 1000, 245, TRUE),
+('SUMMER50', 'Giảm 50k cho đơn từ 300k', 'fixed', 50000, '2024-06-01 00:00:00', '2027-08-31 23:59:59', 500, 89, TRUE),
+('AUTUMN20', 'Giảm 20% toàn bộ sách văn học', 'percent', 20, '2025-09-01 00:00:00', '2026-10-31 23:59:59', 300, 45, TRUE),
 ('FREESHIP30', 'Giảm 30k phí vận chuyển', 'fixed', 30000, '2025-08-15 00:00:00', '2025-09-15 23:59:59', 200, 67, TRUE),
 ('FLASHSALE', 'Flash sale giảm 15% đơn từ 200k', 'percent', 15, '2025-08-01 00:00:00', '2025-08-31 23:59:59', 100, 98, TRUE),
 ('MEMBERS50', 'Thành viên thân thiết giảm 50k', 'fixed', 50000, '2025-07-01 00:00:00', '2025-12-31 23:59:59', 500, 123, FALSE),
