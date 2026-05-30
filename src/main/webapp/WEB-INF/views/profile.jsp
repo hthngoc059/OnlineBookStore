@@ -44,7 +44,7 @@
                             <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
                           
                         </a>
-                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
                             <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="cart"/>
                             
                         </a>
@@ -91,10 +91,7 @@
             <i class="bi bi-person-circle"></i>
             <div>
                 <div class="profile-name">${sessionScope.currentUser.username}</div>
-                <a href="#" class="profile-edit-link">
-                    <i class="bi bi-pencil"></i> Sửa hồ sơ
-                </a>
-            </div>
+        </div>
         </div>
 
         <nav class="profile-nav">
@@ -123,25 +120,139 @@
 
     <%-- NỘI DUNG CHÍNH --%>
     <div class="profile-content">
-        <h2 class="profile-title">Hồ sơ của tôi</h2>
-        <p style="color:#888; font-size:0.85rem; margin-bottom:28px;">
-            Quản lý thông tin tài khoản
-        </p>
 
-        <div class="profile-form-row">
-            <label>Tên đăng nhập</label>
-            <span>${sessionScope.currentUser.username}</span>
-        </div>
-        <div class="profile-form-row">
-            <label>Email</label>
-            <span>${sessionScope.currentUser.email}</span>
-        </div>
-        <div class="profile-form-row">
-            <label>Số điện thoại</label>
-            <span>${not empty sessionScope.currentUser.phone 
-                      ? sessionScope.currentUser.phone 
-                      : 'Chưa cập nhật'}</span>
-        </div>
+        <c:choose>
+            <%-- ── TAB: ĐỔI MẬT KHẨU ── --%>
+            <c:when test="${param.action == 'password'}">
+                <h2 class="profile-title">Đổi Mật Khẩu</h2>
+                <p style="color:#888; font-size:0.85rem; margin-bottom:28px;
+                          border-bottom:1px solid #f0f0f0; padding-bottom:16px;">
+                    Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu
+                </p>
+
+                <c:if test="${not empty successMsg}">
+                    <div class="profile-alert profile-alert--ok">✅ ${successMsg}</div>
+                </c:if>
+                <c:if test="${not empty errorMsg}">
+                    <div class="profile-alert profile-alert--err">❌ ${errorMsg}</div>
+                </c:if>
+
+                <form method="post"
+                      action="${pageContext.request.contextPath}/profile?action=password">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+                    <%-- Mật khẩu hiện tại --%>
+                    <div class="profile-form-row">
+                        <label>Mật khẩu hiện tại</label>
+                        <div class="profile-pw-wrap">
+                            <input type="password" name="currentPassword"
+                                   id="currentPassword"
+                                   placeholder="Nhập mật khẩu hiện tại"
+                                   class="profile-input" required/>
+                            <span class="pw-toggle" onclick="togglePw('currentPassword', this)">
+                                <i class="bi bi-eye-slash"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <%-- Mật khẩu mới --%>
+                    <div class="profile-form-row">
+                        <label>Mật khẩu mới</label>
+                        <div class="profile-pw-wrap">
+                            <input type="password" name="newPassword"
+                                   id="newPassword"
+                                   placeholder="Tối thiểu 6 ký tự"
+                                   class="profile-input" required/>
+                            <span class="pw-toggle" onclick="togglePw('newPassword', this)">
+                                <i class="bi bi-eye-slash"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <%-- Xác nhận mật khẩu --%>
+                    <div class="profile-form-row">
+                        <label>Xác nhận mật khẩu</label>
+                        <div class="profile-pw-wrap">
+                            <input type="password" name="confirmPassword"
+                                   id="confirmPassword"
+                                   placeholder="Nhập lại mật khẩu mới"
+                                   class="profile-input" required/>
+                            <span class="pw-toggle" onclick="togglePw('confirmPassword', this)">
+                                <i class="bi bi-eye-slash"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="profile-form-row" style="border:none; padding-top:8px;">
+                        <label></label>
+                        <button type="submit" class="btn-profile-save">Xác Nhận</button>
+                    </div>
+                </form>
+
+                <script>
+                function togglePw(id, btn) {
+                    const input = document.getElementById(id);
+                    const icon  = btn.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.className = 'bi bi-eye';
+                    } else {
+                        input.type = 'password';
+                        icon.className = 'bi bi-eye-slash';
+                    }
+                }
+                </script>
+            </c:when>
+
+            <%-- ── TAB: HỒ SƠ (mặc định) ── --%>
+            <c:otherwise>
+                <h2 class="profile-title">Hồ Sơ Của Tôi</h2>
+                <p style="color:#888; font-size:0.85rem; margin-bottom:28px;
+                          border-bottom:1px solid #f0f0f0; padding-bottom:16px;">
+                    Quản lý thông tin hồ sơ để bảo mật tài khoản
+                </p>
+
+                <c:if test="${not empty successMsg}">
+                    <div class="profile-alert profile-alert--ok">✅ ${successMsg}</div>
+                </c:if>
+                <c:if test="${not empty errorMsg}">
+                    <div class="profile-alert profile-alert--err">❌ ${errorMsg}</div>
+                </c:if>
+
+                <form method="post" action="${pageContext.request.contextPath}/profile">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+                    <div class="profile-form-row">
+                        <label>Tên đăng nhập</label>
+                        <div>
+                            <input type="text" value="${sessionScope.currentUser.username}"
+                                   class="profile-input profile-input--readonly" readonly/>
+                            <div class="profile-hint">Tên đăng nhập không thể thay đổi.</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-form-row">
+                        <label>Email</label>
+                        <input type="text" value="${sessionScope.currentUser.email}"
+                               class="profile-input profile-input--readonly" readonly/>
+                    </div>
+
+                    <div class="profile-form-row">
+                        <label>Số điện thoại</label>
+                        <input type="tel" name="phoneNumber"
+                               value="${sessionScope.currentUser.phoneNumber}"
+                               placeholder="Nhập số điện thoại"
+                               class="profile-input"/>
+                    </div>
+
+                    <div class="profile-form-row" style="border:none; padding-top:8px;">
+                        <label></label>
+                        <button type="submit" class="btn-profile-save">Lưu</button>
+                    </div>
+                </form>
+            </c:otherwise>
+        </c:choose>
+
     </div>
 
 </div>

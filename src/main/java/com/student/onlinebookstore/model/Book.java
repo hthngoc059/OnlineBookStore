@@ -139,13 +139,8 @@ public class Book {
     public String getPriceFormatted() {
         if (price == null) return "0";
         
-        java.text.DecimalFormat df = new java.text.DecimalFormat();
-        df.setGroupingUsed(true);
-        df.setGroupingSize(3);
-        df.setMinimumFractionDigits(0);
-        df.setMaximumFractionDigits(0);
-        
-        return df.format(price).replace(",", ".");
+        java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+        return df.format(price).replace(",", ".") + "đ";
     }
     
     public Integer getStockQuantity() { return stockQuantity; }

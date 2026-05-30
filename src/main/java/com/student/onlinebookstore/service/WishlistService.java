@@ -13,4 +13,5 @@ public interface WishlistService {
     int getWishlistCount(Integer userId);
     WishlistResponse moveToCart(Integer userId, Integer wishlistItemId);
     WishlistResponse addAllToCart(Integer userId);
+    Integer getWishlistItemId(Integer userId, Integer bookId);
 }

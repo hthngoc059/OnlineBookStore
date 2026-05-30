@@ -54,7 +54,7 @@
                                         <c:otherwise><span class="status-badge pending">User</span></c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td><fmt:formatDate value="${user.createdAt}" pattern="dd/MM/yyyy"/>}</td>
+                                <td><fmt:formatDate value="${user.createdAtAsDate}" pattern="dd/MM/yyyy HH:mm" /></td>
                                 <td>
                                     <a href="javascript:void(0)" onclick="confirmDelete(${user.userId})" class="btn-icon btn-danger">🗑️ Xóa</a>
                                 </td>

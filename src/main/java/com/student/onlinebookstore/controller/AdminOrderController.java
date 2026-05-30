@@ -45,7 +45,7 @@ public class AdminOrderController extends HttpServlet {
             List<OrderItem> orderItems = orderDAO.getOrderItems(orderId);
             var payment = paymentDAO.getPaymentByOrderId(orderId);
             
-            // Add user details to order for display in admin panel
+            // Add user details to order
             if (order != null && order.getUser() != null) {
                 User fullUser = userDAO.getUserById(order.getUser().getUserId());
                 order.setUser(fullUser);
@@ -57,23 +57,32 @@ public class AdminOrderController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/views/admin/order-detail.jsp").forward(req, resp);
             
         } else {
-            // List orders with pagination and optional filtering
+            // List orders with pagination, filtering, and search
             int page = req.getParameter("page") != null ? Integer.parseInt(req.getParameter("page")) : 0;
             int size = 10;
             String status = req.getParameter("status");
+            String keyword = req.getParameter("keyword");
             
             List<Order> orders;
             int totalOrders;
             
-            if (status != null && !status.isEmpty()) {
+            // Handle search by keyword (orderId or username)
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                orders = orderDAO.searchOrders(keyword, page, size);
+                totalOrders = orderDAO.countSearchOrders(keyword);
+            } 
+            // Handle filter by status
+            else if (status != null && !status.isEmpty()) {
                 orders = orderDAO.getOrdersByStatus(status, page, size);
                 totalOrders = orderDAO.countOrdersByStatus(status);
-            } else {
+            } 
+            // Default: get all orders
+            else {
                 orders = orderDAO.getAllOrders(page, size);
                 totalOrders = orderDAO.countAllOrders();
             }
             
-            // Add user details to each order for display in the admin panel
+            // Add user details to each order
             for (Order order : orders) {
                 if (order.getUser() != null) {
                     User fullUser = userDAO.getUserById(order.getUser().getUserId());
@@ -92,31 +101,76 @@ public class AdminOrderController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
         
-        if (!isAdmin(req, resp)) return;
+        System.out.println("=== doPost called ===");
+        System.out.println("Action: " + req.getParameter("action"));
+        System.out.println("OrderId: " + req.getParameter("orderId"));
+        
+        if (!isAdmin(req, resp)) {
+            System.out.println("isAdmin returned false");
+            return;
+        }
         
         String action = req.getParameter("action");
         
         if ("updateStatus".equals(action)) {
-            int orderId = Integer.parseInt(req.getParameter("orderId"));
-            String status = req.getParameter("status");
-            String paymentStatus = req.getParameter("paymentStatus");
-            
-            if (status != null && !status.isEmpty()) {
-                orderDAO.updateOrderStatus(orderId, status);
-            }
-            if (paymentStatus != null && !paymentStatus.isEmpty()) {
-                orderDAO.updatePaymentStatus(orderId, paymentStatus);
+            try {
+                int orderId = Integer.parseInt(req.getParameter("orderId"));
+                String status = req.getParameter("status");
+                String paymentStatus = req.getParameter("paymentStatus");
                 
-                // If payment status is updated to "paid", we can also update the payment record in the database
-                if ("paid".equals(paymentStatus)) {
-                    var payment = paymentDAO.getPaymentByOrderId(orderId);
-                    if (payment != null) {
-                        paymentDAO.updatePaymentStatus(payment.getPaymentId(), "completed", payment.getTransactionId());
-                    }
+                // Validate inputs
+                if (status == null || status.isEmpty()) {
+                    req.getSession().setAttribute("errorMessage", "Vui lòng chọn trạng thái đơn hàng!");
+                    resp.sendRedirect(req.getContextPath() + "/admin/orders?action=detail&id=" + orderId);
+                    return;
                 }
+                
+                if (paymentStatus == null || paymentStatus.isEmpty()) {
+                    req.getSession().setAttribute("errorMessage", "Vui lòng chọn trạng thái thanh toán!");
+                    resp.sendRedirect(req.getContextPath() + "/admin/orders?action=detail&id=" + orderId);
+                    return;
+                }
+                
+                // Update both status and payment status in orders table
+                boolean orderUpdated = orderDAO.updateOrderStatus(orderId, status);
+                boolean paymentUpdated = orderDAO.updatePaymentStatus(orderId, paymentStatus);
+                
+                System.out.println("Order ID: " + orderId);
+                System.out.println("New Status: " + status);
+                System.out.println("New Payment Status: " + paymentStatus);
+                System.out.println("Order Updated: " + orderUpdated);
+                System.out.println("Payment Updated: " + paymentUpdated);
+                
+                if (orderUpdated || paymentUpdated) {
+                    // Update payment record in payments table if needed
+                    if ("paid".equals(paymentStatus)) {
+                        var payment = paymentDAO.getPaymentByOrderId(orderId);
+                        if (payment != null) {
+                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "completed", payment.getTransactionId());
+                        }
+                    } else if ("refunded".equals(paymentStatus)) {
+                        var payment = paymentDAO.getPaymentByOrderId(orderId);
+                        if (payment != null) {
+                            paymentDAO.updatePaymentStatus(payment.getPaymentId(), "refunded", payment.getTransactionId());
+                        }
+                    }
+                    
+                    req.getSession().setAttribute("successMessage", "Cập nhật trạng thái đơn hàng thành công!");
+                } else {
+                    req.getSession().setAttribute("errorMessage", "Không có thay đổi nào được thực hiện!");
+                }
+                
+                resp.sendRedirect(req.getContextPath() + "/admin/orders?action=detail&id=" + orderId);
+                
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                req.getSession().setAttribute("errorMessage", "Mã đơn hàng không hợp lệ!");
+                resp.sendRedirect(req.getContextPath() + "/admin/orders");
+            } catch (Exception e) {
+                e.printStackTrace();
+                req.getSession().setAttribute("errorMessage", "Lỗi khi cập nhật: " + e.getMessage());
+                resp.sendRedirect(req.getContextPath() + "/admin/orders?action=detail&id=" + req.getParameter("orderId"));
             }
-            
-            resp.sendRedirect(req.getContextPath() + "/admin/orders?action=detail&id=" + orderId);
         }
     }
     
@@ -127,7 +181,7 @@ public class AdminOrderController extends HttpServlet {
             return false;
         }
         User currentUser = (User) session.getAttribute("currentUser");
-        if (!"admin".equals(currentUser.getRole().name())) {
+        if (!"admin".equals(currentUser.getRole().name().toLowerCase())) {
             resp.sendRedirect(req.getContextPath() + "/");
             return false;
         }

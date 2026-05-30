@@ -46,7 +46,7 @@
                             <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
                           
                         </a>
-                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
                             <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="cart"/>
                             
                         </a>
@@ -308,45 +308,122 @@
 
 <script>
   const RAW_TOTAL = ${totalAmount};
+  const CSRF_TOKEN_NAME = "${_csrf.parameterName}";
+  const CSRF_TOKEN_VALUE = "${_csrf.token}";
+  const CTX = "${pageContext.request.contextPath}";
+
   let appliedDiscount = 0;
+  let appliedDiscountId = null;
 
   function selectCard(label, cls) {
     document.querySelectorAll('.' + cls).forEach(el => el.classList.remove('selected'));
     label.classList.add('selected');
   }
 
-  /* Discount mô phỏng */
-  const CODES = {
-    'SALE10':  { type: 'pct', val: 10,    max: null },
-    'SAVE20':  { type: 'pct', val: 20,    max: 100000 },
-    'FIXED50': { type: 'fix', val: 50000, max: null }
-  };
-
-  function applyDiscount() {
+  async function applyDiscount() {
     const code = document.getElementById('discountInput').value.trim().toUpperCase();
     const msg  = document.getElementById('discountMsg');
-    if (!code) { msg.className = 'err'; msg.textContent = 'Vui lòng nhập mã giảm giá'; return; }
+    const btn  = document.querySelector('.btn-apply-discount');
 
-    const d = CODES[code];
-    if (!d) {
-      msg.className = 'err';
-      msg.textContent = '❌ Mã không hợp lệ hoặc đã hết hạn';
-      appliedDiscount = 0;
-      updateTotals();
+    if (!code) {
+      showMsg(msg, 'err', 'Vui lòng nhập mã giảm giá');
       return;
     }
-    appliedDiscount = d.type === 'pct'
-      ? Math.min(RAW_TOTAL * d.val / 100, d.max || Infinity)
-      : Math.min(d.val, RAW_TOTAL);
 
-    msg.className = 'ok';
-    msg.textContent = '✅ Áp dụng thành công! Giảm ' + fmtNum(appliedDiscount) + 'đ';
-    updateTotals();
+    // Loading state
+    btn.disabled = true;
+    btn.textContent = 'Đang kiểm tra...';
+    msg.className = '';
+    msg.textContent = '';
+
+    try {
+      const params = new URLSearchParams();
+      params.append(CSRF_TOKEN_NAME, CSRF_TOKEN_VALUE);
+      params.append('code', code);
+      params.append('totalAmount', RAW_TOTAL);
+
+      const res = await fetch(CTX + '/checkout/validate-discount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        appliedDiscount   = Number(data.discountAmount);
+        appliedDiscountId = data.discountId;
+
+        // Thêm hidden input discountId vào form để submit
+        let hiddenInput = document.getElementById('hiddenDiscountId');
+        if (!hiddenInput) {
+          hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.id   = 'hiddenDiscountId';
+          hiddenInput.name = 'discountId';
+          document.getElementById('checkoutForm').appendChild(hiddenInput);
+        }
+        hiddenInput.value = appliedDiscountId;
+
+        // Hiện modal thành công
+        showSuccessModal(data.description || code, appliedDiscount);
+        updateTotals();
+
+      } else {
+        appliedDiscount   = 0;
+        appliedDiscountId = null;
+        // Xoá hidden input nếu có
+        const old = document.getElementById('hiddenDiscountId');
+        if (old) old.remove();
+
+        showMsg(msg, 'err', '❌ ' + (data.message || 'Mã không hợp lệ hoặc đã hết hạn'));
+        updateTotals();
+      }
+
+    } catch (err) {
+      showMsg(msg, 'err', '❌ Lỗi kết nối, vui lòng thử lại');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Áp dụng';
+    }
+  }
+
+  function showMsg(el, cls, text) {
+    el.className = cls;
+    el.textContent = text;
+  }
+
+  /* ── Modal thông báo áp dụng voucher thành công ── */
+  function showSuccessModal(description, amount) {
+    // Tạo modal nếu chưa có
+    let modal = document.getElementById('voucherModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'voucherModal';
+      modal.innerHTML = `
+        <div class="voucher-modal-overlay" onclick="closeVoucherModal()"></div>
+        <div class="voucher-modal-box">
+          <div class="voucher-modal-icon"><i class="bi bi-patch-check-fill"></i></div>
+          <h3>Áp dụng mã thành công!</h3>
+          <p id="voucherModalDesc"></p>
+          <p class="voucher-modal-amount">Tiết kiệm: <strong id="voucherModalAmt"></strong></p>
+          <button class="btn-voucher-close" onclick="closeVoucherModal()">Tuyệt vời!</button>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+    document.getElementById('voucherModalDesc').textContent = description;
+    document.getElementById('voucherModalAmt').textContent  = fmtNum(amount) + 'đ';
+    modal.classList.add('show');
+  }
+
+  function closeVoucherModal() {
+    const modal = document.getElementById('voucherModal');
+    if (modal) modal.classList.remove('show');
   }
 
   function updateTotals() {
-    const final = Math.max(0, RAW_TOTAL - appliedDiscount);
-    document.getElementById('totalDisplay').textContent = fmtNum(final) + 'đ';
+    const final_ = Math.max(0, RAW_TOTAL - appliedDiscount);
+    document.getElementById('totalDisplay').textContent = fmtNum(final_) + 'đ';
     const row = document.getElementById('discountRow');
     if (appliedDiscount > 0) {
       row.style.display = '';

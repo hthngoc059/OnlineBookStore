@@ -149,7 +149,7 @@ public class PasswordHashGenerator {
         PasswordHashGenerator phg = new PasswordHashGenerator();
         
         // Test password hashing
-        String password = "MySecretPassword123!";
+        String password = "Admin@123";
         String hashed = phg.hashPassword(password);
         
         System.out.println("Original password: " + password);

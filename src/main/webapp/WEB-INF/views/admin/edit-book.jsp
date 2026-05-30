@@ -92,7 +92,13 @@
                             <label>Thể loại</label>
                             <select name="genreIds" multiple size="4">
                                 <c:forEach var="genre" items="${genres}">
-                                    <option value="${genre.genreId}" ${book.genreIds.contains(genre.genreId) ? 'selected' : ''}>${genre.genreName}</option>
+                                    <c:set var="selected" value="false"/>
+                                    <c:forEach var="bookGenreId" items="${bookGenreIds}">
+                                        <c:if test="${bookGenreId == genre.genreId}">
+                                            <c:set var="selected" value="true"/>
+                                        </c:if>
+                                    </c:forEach>
+                                    <option value="${genre.genreId}" ${selected ? 'selected' : ''}>${genre.genreName}</option>
                                 </c:forEach>
                             </select>
                             <small style="color:#888;">Giữ Ctrl để chọn nhiều thể loại</small>

@@ -13,8 +13,8 @@
             <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
             <!--NAV LINKS -->
             <ul class="navbar__nav">
-                <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Tất cả sách</a></li>
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
                 <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
                 <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
                 <li class="navbar__search-item">
@@ -43,7 +43,7 @@
                             <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
                           
                         </a>
-                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
                             <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="cart"/>
                             
                         </a>

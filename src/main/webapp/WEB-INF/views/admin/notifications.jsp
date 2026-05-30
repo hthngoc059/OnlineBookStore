@@ -16,7 +16,7 @@
 
         <main class="main-content">
             <header class="main-header">
-                <div class="header-title"> WEB-INF
+                <div class="header-title"> 
                     <h1>Quản lý thông báo</h1>
                     <p>Gửi thông báo đến người dùng</p>
                 </div>
@@ -86,7 +86,7 @@
                                 </td>
                                 <td><strong>${notif.title}</strong></td>
                                 <td>${notif.message}</td>
-                                <td><fmt:formatDate value="${notif.createdAt}" pattern="dd/MM/yyyy HH:mm"/>}</td>
+                                <td><fmt:formatDate value="${notification.createdAtAsDate}" pattern="dd/MM/yyyy HH:mm" /></td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${notif.isRead}">

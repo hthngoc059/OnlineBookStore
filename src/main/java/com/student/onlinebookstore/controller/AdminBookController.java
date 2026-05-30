@@ -214,7 +214,7 @@ public class AdminBookController extends HttpServlet {
                 // Upload ảnh mới nếu có
                 Part filePart = req.getPart("coverImage");
                 if (filePart != null && filePart.getSize() > 0) {
-                    String imageUrl = uploadFile(req, filePart);  // ← SỬA: truyền req vào
+                    String imageUrl = uploadFile(req, filePart);  
                     book.setCoverImageUrl(imageUrl);
                 }
                 
@@ -235,7 +235,9 @@ public class AdminBookController extends HttpServlet {
                 }
             }
             
-            resp.sendRedirect(req.getContextPath() + "/admin/books");
+            String redirectUrl = req.getContextPath() + "/admin/books";
+            System.out.println("Redirecting to: " + redirectUrl);
+            resp.sendRedirect(redirectUrl);
         }
     }
     

@@ -2,6 +2,8 @@ package com.student.onlinebookstore.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +95,16 @@ public class User {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Date getCreatedAtAsDate() {
+        if (createdAt == null) return null;
+        return Date.from(createdAt.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public Date getUpdatedAtAsDate() {
+        if (updatedAt == null) return null;
+        return Date.from(updatedAt.atZone(ZoneId.systemDefault()).toInstant());
+    }
     
     public List<Address> getAddresses() { return addresses; }
     public void setAddresses(List<Address> addresses) { this.addresses = addresses; }

@@ -8,6 +8,7 @@ import com.student.onlinebookstore.util.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -26,19 +27,32 @@ public class OrderDAO {
         "INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES (?, ?, ?, ?)";
     
     private static final String SQL_GET_ORDER_BY_ID = 
-        "SELECT * FROM orders WHERE order_id = ?";
+        "SELECT o.*, u.username, u.email, u.phone_number, " +
+        "a.full_name as address_full_name, a.phone as address_phone, " +
+        "a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o " +
+        "LEFT JOIN users u ON o.user_id = u.user_id " +
+        "LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "WHERE o.order_id = ?";
     
     private static final String SQL_GET_ORDER_ITEMS = 
-        "SELECT oi.*, b.title, b.author, b.cover_image_url " +
-        "FROM order_items oi JOIN books b ON oi.book_id = b.book_id " +
+        "SELECT oi.*, b.title, b.author, b.cover_image_url " + 
+        "FROM order_items oi JOIN books b ON oi.book_id = b.book_id " + 
         "WHERE oi.order_id = ?";
     
     private static final String SQL_GET_ORDERS_BY_USER = 
         "SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC LIMIT ? OFFSET ?";
     
     private static final String SQL_GET_ALL_ORDERS = 
-        "SELECT * FROM orders ORDER BY order_date DESC LIMIT ? OFFSET ?";
-    
+        "SELECT o.*, u.username, u.email FROM orders o " + 
+        "LEFT JOIN users u ON o.user_id = u.user_id " +
+        "ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+
+    private static final String SQL_GET_RECENT_ORDERS_WITH_USER = 
+        "SELECT o.*, u.username, u.email FROM orders o " +
+        "LEFT JOIN users u ON o.user_id = u.user_id " +
+        "ORDER BY o.order_date DESC LIMIT ?";
+            
     private static final String SQL_GET_ORDERS_BY_STATUS = 
         "SELECT * FROM orders WHERE status = ? ORDER BY order_date DESC LIMIT ? OFFSET ?";
     
@@ -59,6 +73,9 @@ public class OrderDAO {
     
     private static final String SQL_COUNT_BY_STATUS = 
         "SELECT COUNT(*) FROM orders WHERE status = ?";
+
+    private static final String SQL_UPDATE_ORDER_STATUS_AND_PAYMENT = 
+    "UPDATE orders SET status = ?, payment_status = ?, updated_at = NOW() WHERE order_id = ?";
     
     // Create order
     public int createOrder(Order order) {
@@ -116,7 +133,7 @@ public class OrderDAO {
         Order order = null;
         
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ORDER_BY_ID)) {
+            PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ORDER_BY_ID)) {  // Dùng SQL_GET_ORDER_BY_ID
             
             pstmt.setInt(1, orderId);
             
@@ -199,14 +216,15 @@ public class OrderDAO {
         int offset = page * size;
         
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ALL_ORDERS)) {
+            PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ALL_ORDERS)) {
             
             pstmt.setInt(1, size);
             pstmt.setInt(2, offset);
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    orders.add(mapResultSetToOrder(rs));
+                    Order order = mapResultSetToOrder(rs);
+                    orders.add(order);
                 }
             }
             
@@ -216,7 +234,7 @@ public class OrderDAO {
         
         return orders;
     }
-    
+
     // Get orders by status
     public List<Order> getOrdersByStatus(String status, int page, int size) {
         List<Order> orders = new ArrayList<>();
@@ -244,8 +262,10 @@ public class OrderDAO {
     
     // Update order status
     public boolean updateOrderStatus(int orderId, String status) {
+        String sql = "UPDATE orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
+        
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_UPDATE_ORDER_STATUS)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, status);
             pstmt.setInt(2, orderId);
@@ -254,15 +274,17 @@ public class OrderDAO {
             return rowsAffected > 0;
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi khi cập nhật trạng thái đơn hàng: {}", e.getMessage());
             return false;
         }
     }
-    
+
     // Update payment status
     public boolean updatePaymentStatus(int orderId, String paymentStatus) {
+        String sql = "UPDATE orders SET payment_status = ?, updated_at = NOW() WHERE order_id = ?";
+        
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_UPDATE_PAYMENT_STATUS)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, paymentStatus);
             pstmt.setInt(2, orderId);
@@ -271,7 +293,7 @@ public class OrderDAO {
             return rowsAffected > 0;
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Lỗi khi cập nhật trạng thái thanh toán: {}", e.getMessage());
             return false;
         }
     }
@@ -366,20 +388,84 @@ public class OrderDAO {
         order.setStatus(Order.OrderStatus.valueOf(rs.getString("status")));
         order.setPaymentStatus(Order.PaymentStatus.valueOf(rs.getString("payment_status")));
 
-        // ✅ THÊM 2 ĐOẠN NÀY
         User user = new User();
         user.setUserId(rs.getInt("user_id"));
+        
+        try {
+            String username = rs.getString("username");
+            if (username != null) {
+                user.setUsername(username);
+            }
+            String email = rs.getString("email");
+            if (email != null) {
+                user.setEmail(email);
+            }
+            String phoneNumber = rs.getString("phone_number");
+            if (phoneNumber != null) {
+                user.setPhoneNumber(phoneNumber);
+            }
+        } catch (SQLException e) {
+            // Ignore
+        }
         order.setUser(user);
 
         Address address = new Address();
         address.setAddressId(rs.getInt("address_id"));
+        try {
+            String fullName = rs.getString("address_full_name");
+            if (fullName != null) {
+                address.setFullName(fullName);
+            }
+            String phone = rs.getString("address_phone");
+            if (phone != null) {
+                address.setPhone(phone);
+            }
+            String addressLine = rs.getString("address_line");
+            if (addressLine != null) {
+                address.setAddressLine(addressLine);
+            }
+            String ward = rs.getString("ward");
+            if (ward != null) {
+                address.setWard(ward);
+            }
+            String district = rs.getString("district");
+            if (district != null) {
+                address.setDistrict(district);
+            }
+            String city = rs.getString("city");
+            if (city != null) {
+                address.setCity(city);
+            }
+        } catch (SQLException e) {
+            // Ignore
+        }
         order.setAddress(address);
-        // ✅ KẾT THÚC THÊM
 
         if (rs.getTimestamp("updated_at") != null) {
             order.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         }
         return order;
+    }
+
+    public List<Order> getRecentOrdersWithUser(int limit) {
+        List<Order> orders = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(SQL_GET_RECENT_ORDERS_WITH_USER)) {
+            
+            pstmt.setInt(1, limit);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToOrder(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return orders;
     }
 
     public boolean updateOrderDiscount(int orderId, BigDecimal discountAmount, BigDecimal finalAmount) {
@@ -399,5 +485,196 @@ public class OrderDAO {
             logger.error("Lỗi khi cập nhật giảm giá cho đơn hàng: {}", e.getMessage());
             return false;
         }
+    }
+
+    public List<Order> searchOrders(String keyword, int offset, int limit) {
+        String sql = "SELECT o.*, u.username, u.email FROM orders o " +
+                    "LEFT JOIN users u ON o.user_id = u.user_id " +
+                    "WHERE CAST(o.order_id AS CHAR) LIKE ? OR u.username LIKE ? " +
+                    "ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setInt(3, limit);
+            stmt.setInt(4, offset);
+            
+            List<Order> orders = new ArrayList<>();
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+            return orders;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public int countSearchOrders(String keyword) {
+        String sql = "SELECT COUNT(*) FROM orders o " +
+                    "LEFT JOIN users u ON o.user_id = u.user_id " +
+                    "WHERE CAST(o.order_id AS CHAR) LIKE ? OR u.username LIKE ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public boolean updateOrderStatusAndPayment(int orderId, String status, String paymentStatus) {
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(SQL_UPDATE_ORDER_STATUS_AND_PAYMENT)) {
+            
+            pstmt.setString(1, status);
+            pstmt.setString(2, paymentStatus);
+            pstmt.setInt(3, orderId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            logger.error("Lỗi khi cập nhật trạng thái đơn hàng: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    // Lấy doanh thu theo ngày trong khoảng thời gian
+    public List<Object[]> getDailyRevenue(LocalDate startDate, LocalDate endDate) {
+        List<Object[]> dailyRevenue = new ArrayList<>();
+        String sql = "SELECT DATE(o.order_date) as date, SUM(o.final_amount) as revenue " +
+                    "FROM orders o " +
+                    "JOIN payments p ON o.order_id = p.order_id " +
+                    "WHERE o.status != 'cancelled' " +
+                    "AND p.payment_status = 'completed' " +
+                    "AND DATE(o.order_date) BETWEEN ? AND ? " +
+                    "GROUP BY DATE(o.order_date) " +
+                    "ORDER BY date ASC";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, Date.valueOf(startDate));
+            pstmt.setDate(2, Date.valueOf(endDate));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = new Object[2];
+                    row[0] = rs.getDate("date").toLocalDate();
+                    row[1] = rs.getBigDecimal("revenue");
+                    dailyRevenue.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return dailyRevenue;
+    }
+
+    // Lấy doanh thu theo phương thức thanh toán
+    public List<Object[]> getRevenueByPaymentMethod(LocalDate startDate, LocalDate endDate) {
+        List<Object[]> paymentStats = new ArrayList<>();
+        String sql = "SELECT p.payment_method, SUM(o.final_amount) as total " +
+                    "FROM orders o " +
+                    "JOIN payments p ON o.order_id = p.order_id " +
+                    "WHERE o.status != 'cancelled' " +
+                    "AND p.payment_status = 'completed' " +
+                    "AND DATE(o.order_date) BETWEEN ? AND ? " +
+                    "GROUP BY p.payment_method";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, Date.valueOf(startDate));
+            pstmt.setDate(2, Date.valueOf(endDate));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = new Object[2];
+                    row[0] = rs.getString("payment_method");
+                    row[1] = rs.getBigDecimal("total");
+                    paymentStats.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return paymentStats;
+    }
+
+    // Lấy top sách bán chạy
+    public List<Object[]> getTopSellingBooks(LocalDate startDate, LocalDate endDate, int limit) {
+        List<Object[]> topBooks = new ArrayList<>();
+        String sql = "SELECT b.book_id, b.title, b.author, " +
+                    "SUM(oi.quantity) as total_sold, " +
+                    "SUM(oi.quantity * oi.price_at_time) as revenue " +
+                    "FROM order_items oi " +
+                    "JOIN orders o ON oi.order_id = o.order_id " +
+                    "JOIN books b ON oi.book_id = b.book_id " +
+                    "WHERE o.status != 'cancelled' " +
+                    "AND DATE(o.order_date) BETWEEN ? AND ? " +
+                    "GROUP BY b.book_id " +
+                    "ORDER BY total_sold DESC LIMIT ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, Date.valueOf(startDate));
+            pstmt.setDate(2, Date.valueOf(endDate));
+            pstmt.setInt(3, limit);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = new Object[5];
+                    row[0] = rs.getInt("book_id");
+                    row[1] = rs.getString("title");
+                    row[2] = rs.getString("author");
+                    row[3] = rs.getInt("total_sold");
+                    row[4] = rs.getBigDecimal("revenue");
+                    topBooks.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return topBooks;
+    }
+
+    public int countOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = "SELECT COUNT(*) FROM orders o " +
+                    "JOIN payments p ON o.order_id = p.order_id " +
+                    "WHERE o.status != 'cancelled' " +
+                    "AND p.payment_status = 'completed' " +
+                    "AND DATE(o.order_date) BETWEEN ? AND ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, Date.valueOf(startDate));
+            pstmt.setDate(2, Date.valueOf(endDate));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

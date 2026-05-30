@@ -12,6 +12,7 @@ import com.student.onlinebookstore.dto.response.PaginationResponse;
 import com.student.onlinebookstore.exception.DuplicateResourceException;
 import com.student.onlinebookstore.exception.InvalidCredentialsException;
 import com.student.onlinebookstore.exception.ResourceNotFoundException;
+import com.student.onlinebookstore.exception.WeakPasswordException;
 import com.student.onlinebookstore.model.User;
 import com.student.onlinebookstore.util.JwtUtil;
 import com.student.onlinebookstore.util.PasswordHashGenerator;
@@ -49,9 +50,17 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new InvalidCredentialsException("Email hoặc password không đúng");
         }
+
+        logger.debug("Starting password verification for user: {}", user.getUsername());
         
         if (!passwordHashGenerator.verifyPassword(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Email hoặc password không đúng");
+        }
+
+        if (passwordHashGenerator.needsRehash(user.getPassword())) {
+            String newHash = passwordHashGenerator.hashPassword(request.getPassword());
+            userDAO.updatePassword(user.getUserId(), newHash);
+            logger.info("Rehashed password for user: {}", user.getUsername());
         }
         
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
@@ -107,6 +116,11 @@ public class UserServiceImpl implements UserService {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new InvalidCredentialsException("Xác nhận mật khẩu không khớp");
         }
+
+        if (!passwordHashGenerator.isStrongPassword(request.getPassword())) {
+            String message = passwordHashGenerator.getPasswordStrengthMessage(request.getPassword());
+            throw new WeakPasswordException("Mật khẩu yếu: " + message);
+        }
         
         // Create user
         User user = new User();
@@ -115,6 +129,8 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordHashGenerator.hashPassword(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setRole(User.Role.user); // Default role
+
+        logger.debug("Starting to hash password for user: {}", request.getUsername());
         
         boolean created = userDAO.createUser(user);
         if (!created) {
@@ -193,9 +209,16 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new ResourceNotFoundException("Người dùng không tồn tại");
         }
+
+        logger.debug("Verifying old password for user: {}", user.getUsername());
         
         if (!passwordHashGenerator.verifyPassword(oldPassword, user.getPassword())) {
             throw new InvalidCredentialsException("Mật khẩu cũ không đúng");
+        }
+
+        if (!passwordHashGenerator.isStrongPassword(newPassword)) {
+            String message = passwordHashGenerator.getPasswordStrengthMessage(newPassword);
+            throw new WeakPasswordException("Mật khẩu mới yếu: " + message);
         }
         
         String hashedPassword = passwordHashGenerator.hashPassword(newPassword);

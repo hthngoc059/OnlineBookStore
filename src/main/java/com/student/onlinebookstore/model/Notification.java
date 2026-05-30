@@ -2,6 +2,8 @@ package com.student.onlinebookstore.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Entity
 @Table(name = "notifications")
@@ -51,4 +53,17 @@ public class Notification {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Date getCreatedAtAsDate() {
+        if (createdAt == null) return null;
+        return Date.from(createdAt.atZone(ZoneId.systemDefault()).toInstant());
+    }
+    
+    // Format trực tiếp thành String
+    public String getFormattedCreatedAt() {
+        if (createdAt == null) return "";
+        java.time.format.DateTimeFormatter formatter = 
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return createdAt.format(formatter);
+    }
 }

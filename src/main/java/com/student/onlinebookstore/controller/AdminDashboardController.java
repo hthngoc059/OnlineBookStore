@@ -43,7 +43,7 @@ public class AdminDashboardController extends HttpServlet {
         }
         
         User currentUser = (User) session.getAttribute("currentUser");
-        if (!"admin".equals(currentUser.getRole().name())) {
+        if (!"admin".equals(currentUser.getRole().name().toLowerCase())) {
             resp.sendRedirect(req.getContextPath() + "/");
             return;
         }
@@ -74,7 +74,7 @@ public class AdminDashboardController extends HttpServlet {
         req.setAttribute("lowStockBooks", lowStockBooks.size());
         
         // Get recent orders (limit 10)
-        List<Order> recentOrders = orderDAO.getAllOrders(0, 10);
+        List<Order> recentOrders = orderDAO.getRecentOrdersWithUser(10);
         req.setAttribute("recentOrders", recentOrders);
         
         req.getRequestDispatcher("/WEB-INF/views/admin/dashboard.jsp").forward(req, resp);

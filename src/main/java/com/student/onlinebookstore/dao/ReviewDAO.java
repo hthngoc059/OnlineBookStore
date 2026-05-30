@@ -267,4 +267,20 @@ public class ReviewDAO {
         }
         return 0;
     }
+
+    public double getAverageRating() {
+        String sql = "SELECT AVG(rating) FROM reviews";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
 }

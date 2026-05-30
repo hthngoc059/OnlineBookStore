@@ -37,12 +37,29 @@ public class AdminUserController extends HttpServlet {
             return;
         }
         
-        // List users with pagination and optional filtering
+        // Lấy tham số tìm kiếm và lọc
         int page = req.getParameter("page") != null ? Integer.parseInt(req.getParameter("page")) : 0;
         int size = 10;
+        String keyword = req.getParameter("keyword");
+        String role = req.getParameter("role");
         
-        List<User> users = userDAO.getAllUsers(page, size);
-        int totalUsers = userDAO.getTotalUsers();
+        List<User> users;
+        int totalUsers;
+        
+        // Xử lý tìm kiếm và lọc
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // Tìm kiếm theo keyword (username hoặc email)
+            users = userDAO.searchUsers(keyword, page, size);
+            totalUsers = userDAO.getSearchCount(keyword);
+        } else if (role != null && !role.isEmpty()) {
+            // Lọc theo role
+            users = userDAO.getUsersByRole(role, page, size);
+            totalUsers = userDAO.getCountByRole(role);
+        } else {
+            // Lấy tất cả users
+            users = userDAO.getAllUsers(page, size);
+            totalUsers = userDAO.getTotalUsers();
+        }
         
         req.setAttribute("users", users);
         req.setAttribute("currentPage", page);

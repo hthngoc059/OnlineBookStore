@@ -7,7 +7,6 @@
     <meta charset="UTF-8">
     <title>Báo cáo thống kê - Admin</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -39,7 +38,7 @@
                     <canvas id="revenueChart" width="400" height="200"></canvas>
                 </div>
                 <div class="chart-card">
-                    <div class="chart-header"><h3>🥧 Doanh thu theo phương thức TT</h3></div>
+                    <div class="chart-header"><h3>🥧 Doanh thu theo phương thức thanh toán</h3></div>
                     <canvas id="paymentChart" width="400" height="200"></canvas>
                 </div>
             </div>
@@ -59,6 +58,9 @@
                                 <td><fmt:formatNumber value="${book.revenue}" type="number" groupingUsed="true"/> ₫</td>
                             </tr>
                         </c:forEach>
+                        <c:if test="${empty topSellingBooks}">
+                            <tr><td colspan="5" style="text-align:center;">Chưa có dữ liệu bán hàng</td></tr>
+                        </c:if>
                     </tbody>
                 </table>
             </div>
@@ -71,23 +73,97 @@
             </div>
         </main>
     </div>
+            
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // Chuyển đổi dữ liệu từ JSP sang JavaScript an toàn
+        const dateLabels = ${dateLabelsJson};
+        const revenueData = ${revenueDataJson};
+        const paymentLabels = ${paymentLabelsJson};
+        const paymentData = ${paymentDataJson};
+
+        console.log('Date Labels:', dateLabels);
+        console.log('Revenue Data:', revenueData);
+        console.log('Payment Labels:', paymentLabels);
+        console.log('Payment Data:', paymentData);
+
         // Revenue Chart
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(revenueCtx, {
-            type: 'line',
-            data: { labels: ${dateLabels}, datasets: [{ label: 'Doanh thu (VNĐ)', data: ${revenueData}, borderColor: '#405a28', backgroundColor: 'rgba(64,90,40,0.1)', tension: 0.4, fill: true }] },
-            options: { responsive: true, plugins: { legend: { position: 'top' } } }
-        });
+        if (document.getElementById('revenueChart')) {
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: dateLabels,
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: revenueData,
+                        borderColor: '#405a28',
+                        backgroundColor: 'rgba(64,90,40,0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw;
+                                    return 'Doanh thu: ' + value.toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         // Payment Method Chart
-        const paymentCtx = document.getElementById('paymentChart').getContext('2d');
-        new Chart(paymentCtx, {
-            type: 'doughnut',
-            data: { labels: ${paymentLabels}, datasets: [{ data: ${paymentData}, backgroundColor: ['#405a28', '#2e7d32', '#ed6c02', '#4361ee', '#9c27b0'] }] },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-        });
+        if (document.getElementById('paymentChart')) {
+            const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+            new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: paymentLabels,
+                    datasets: [{
+                        data: paymentData,
+                        backgroundColor: ['#405a28', '#2e7d32', '#ed6c02', '#4361ee', '#9c27b0', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value.toLocaleString('vi-VN')} ₫ (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>

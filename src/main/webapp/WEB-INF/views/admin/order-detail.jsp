@@ -28,10 +28,10 @@
                 <div class="data-table-container">
                     <div class="table-header"><h3>👤 Thông tin khách hàng</h3></div>
                     <table class="data-table">
-                        <tr><th style="width:140px">Họ tên</th><td>${order.address.fullName}</td></tr>
-                        <tr><th>Email</th><td>${order.user.email}</td></tr>
-                        <tr><th>Số điện thoại</th><td>${order.address.phone}</td></tr>
-                        <tr><th>Ngày đặt</th><td>${order.orderDate}</td></tr>
+                        <tr><th style="width:140px">Họ tên</th><td>${not empty order.user ? order.user.username : 'N/A'}</td></tr>
+                        <tr><th>Email</th><td>${not empty order.user ? order.user.email : 'N/A'}</td></tr>
+                        <tr><th>Số điện thoại</th><td>${not empty order.address ? order.address.phone : 'N/A'}</td></tr>
+                        <tr><th>Ngày đặt</th><td>${order.formattedOrderDate}</td></tr>
                     </table>
                 </div>
 
@@ -39,9 +39,17 @@
                 <div class="data-table-container">
                     <div class="table-header"><h3>📦 Địa chỉ giao hàng</h3></div>
                     <table class="data-table">
-                        <tr><th style="width:140px">Người nhận</th><td>${order.address.fullName}</td></tr>
-                        <tr><th>Địa chỉ</th><td>${order.address.addressLine}, ${order.address.ward}, ${order.address.district}, ${order.address.city}</td></tr>
-                        <tr><th>Số điện thoại</th><td>${order.address.phone}</td></tr>
+                        <tr><th style="width:140px">Người nhận</th><td>${not empty order.address ? order.address.fullName : 'N/A'}</td></tr>
+                        <tr><th>Địa chỉ</th><td>
+                            <c:if test="${not empty order.address}">
+                                ${order.address.addressLine}, 
+                                ${order.address.ward}, 
+                                ${order.address.district}, 
+                                ${order.address.city}
+                            </c:if>
+                            <c:if test="${empty order.address}">Không có địa chỉ</c:if>
+                        </td></tr>
+                        <tr><th>Số điện thoại</th><td>${not empty order.address ? order.address.phone : 'N/A'}</td></tr>
                     </table>
                 </div>
             </div>
@@ -60,6 +68,9 @@
                                 <td><fmt:formatNumber value="${item.priceAtTime * item.quantity}" type="number" groupingUsed="true"/> ₫</td>
                             </tr>
                         </c:forEach>
+                        <c:if test="${empty orderItems}">
+                            <tr><td colspan="4" style="text-align:center;">Không có sản phẩm nào</td></tr>
+                        </c:if>
                     </tbody>
                 </table>
             </div>
@@ -74,21 +85,23 @@
                         <tr><th>Thành tiền</th><td><strong style="color:#405a28; font-size:1.1rem;"><fmt:formatNumber value="${order.finalAmount}" type="number" groupingUsed="true"/> ₫</strong></td></tr>
                         <tr><th>Phương thức TT</th><td>
                             <c:choose>
-                                <c:when test="${payment.paymentMethod == 'cod'}">💰 Thanh toán khi nhận hàng (COD)</c:when>
-                                <c:when test="${payment.paymentMethod == 'banking'}">🏦 Chuyển khoản ngân hàng</c:when>
-                                <c:when test="${payment.paymentMethod == 'momo'}">📱 Ví Momo</c:when>
-                                <c:otherwise>${payment.paymentMethod}</c:otherwise>
+                                <c:when test="${payment != null && payment.paymentMethod == 'cod'}">💰 Thanh toán khi nhận hàng (COD)</c:when>
+                                <c:when test="${payment != null && payment.paymentMethod == 'banking'}">🏦 Chuyển khoản ngân hàng</c:when>
+                                <c:when test="${payment != null && payment.paymentMethod == 'momo'}">📱 Ví Momo</c:when>
+                                <c:otherwise>${payment != null ? payment.paymentMethod : 'Chưa có'}</c:otherwise>
                             </c:choose>
                         </td></tr>
                         <tr><th>Trạng thái TT</th><td><span class="payment-badge ${order.paymentStatus}">${order.paymentStatus}</span></td></tr>
                     </table>
                 </div>
 
-                <!-- Update Status -->
+                <!-- Update Status Form - SỬA ACTION -->
                 <div class="data-table-container">
                     <div class="table-header"><h3>🔄 Cập nhật trạng thái</h3></div>
                     <div style="padding: 20px;">
                         <form action="${pageContext.request.contextPath}/admin/orders" method="post">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            
                             <input type="hidden" name="action" value="updateStatus">
                             <input type="hidden" name="orderId" value="${order.orderId}">
                             <div class="form-group">

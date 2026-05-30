@@ -3,6 +3,8 @@ package com.student.onlinebookstore.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +79,15 @@ public class Order {
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
     
+    public String getFormattedOrderDate() {
+        if (orderDate == null) return "";
+        return orderDate.getYear() + "-" + 
+            String.format("%02d", orderDate.getMonthValue()) + "-" + 
+            String.format("%02d", orderDate.getDayOfMonth()) + " " +
+            String.format("%02d", orderDate.getHour()) + ":" + 
+            String.format("%02d", orderDate.getMinute());
+    }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     

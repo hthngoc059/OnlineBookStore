@@ -272,15 +272,19 @@ public class UserDAO {
     
     // Delete user by ID
     public boolean deleteUser(int userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL_DELETE)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
-            
             int rowsAffected = pstmt.executeUpdate();
+            
+            System.out.println("Deleted user with ID: " + userId + ", rows affected: " + rowsAffected);
             return rowsAffected > 0;
             
         } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -345,4 +349,124 @@ public class UserDAO {
         }
         return user;
     }
+<<<<<<< HEAD
+    public boolean updatePhoneNumber(int userId, String phoneNumber) {
+        String sql = "UPDATE users SET phone_number = ?, updated_at = NOW() WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, phoneNumber);
+            pstmt.setInt(2, userId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+=======
+
+    public List<User> searchUsers(String keyword, int page, int size) {
+        List<User> users = new ArrayList<>();
+        int offset = page * size;
+        String sql = "SELECT * FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY user_id DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setInt(3, size);
+            pstmt.setInt(4, offset);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return users;
+    }
+
+    // Get search count
+    public int getSearchCount(String keyword) {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM users WHERE username LIKE ? OR email LIKE ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return count;
+    }
+
+    // Get users by role
+    public List<User> getUsersByRole(String role, int page, int size) {
+        List<User> users = new ArrayList<>();
+        int offset = page * size;
+        String sql = "SELECT * FROM users WHERE role = ? ORDER BY user_id DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, role);
+            pstmt.setInt(2, size);
+            pstmt.setInt(3, offset);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return users;
+    }
+
+    // Get count by role
+    public int getCountByRole(String role) {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM users WHERE role = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, role);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return count;
+    }
+>>>>>>> 6a8f57f (fix admin panel bugs)
 }

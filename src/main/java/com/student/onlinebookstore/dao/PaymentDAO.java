@@ -5,6 +5,7 @@ import com.student.onlinebookstore.util.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -407,5 +408,29 @@ public class PaymentDAO {
         payment.setOrder(order);
         
         return payment;
+    }
+    
+    public BigDecimal getTotalRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+        String sql = "SELECT SUM(o.final_amount) FROM orders o " +
+                    "JOIN payments p ON o.order_id = p.order_id " +
+                    "WHERE o.status != 'cancelled' " +
+                    "AND p.payment_status = 'completed' " +
+                    "AND DATE(o.order_date) BETWEEN ? AND ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, Date.valueOf(startDate));
+            pstmt.setDate(2, Date.valueOf(endDate));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBigDecimal(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return BigDecimal.ZERO;
     }
 }

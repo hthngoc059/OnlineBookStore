@@ -22,10 +22,11 @@
                 </div>
             </header>
 
-            <!-- Filter Bar -->
+            <!-- Filter Bar - THÊM METHOD GET ĐỂ SEARCH HOẠT ĐỘNG -->
             <div class="filter-bar">
-                <form action="${pageContext.request.contextPath}/admin/orders" method="get" class="search-form">
-                    <input type="text" name="keyword" placeholder="Tìm theo mã đơn hoặc tên khách hàng..." value="${param.keyword}">
+                <form action="${pageContext.request.contextPath}/admin/orders" method="get" class="search-form" ">
+                    <input type="text" name="keyword" placeholder="Tìm theo mã đơn hoặc tên khách hàng..." 
+                           value="${param.keyword}">
                     <select name="status">
                         <option value="">Tất cả trạng thái</option>
                         <option value="pending" ${param.status == 'pending' ? 'selected' : ''}>Chờ xác nhận</option>
@@ -35,6 +36,7 @@
                         <option value="cancelled" ${param.status == 'cancelled' ? 'selected' : ''}>Đã hủy</option>
                     </select>
                     <button type="submit" class="btn-secondary">🔍 Tìm kiếm</button>
+                    <a href="${pageContext.request.contextPath}/admin/orders" class="btn-secondary">🔄 Xóa lọc</a>
                 </form>
             </div>
 
@@ -48,9 +50,14 @@
                         <c:forEach var="order" items="${orders}">
                             <tr>
                                 <td>#${order.orderId}</td>
-                                <td>${order.user.username} <br><small>${order.user.email}</small></td>
-                                <td>${order.orderDate.toLocalDate()} <br><small>${order.orderDate.toLocalTime().toString().substring(0,5)}</small></td>
-                                <td><fmt:formatNumber value="${order.finalAmount}" type="number" groupingUsed="true"/> ₫</td>
+                                <td>
+                                    ${not empty order.user ? order.user.username : 'N/A'} 
+                                    <br><small>${not empty order.user ? order.user.email : 'N/A'}</small>
+                                </td>
+                                <td>
+                                    ${order.formattedOrderDate}
+                                </td>
+                                <td>${order.finalAmountFormatted} đ</td>
                                 <td><span class="status-badge ${order.status}">
                                     <c:choose>
                                         <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>
@@ -67,7 +74,7 @@
                                         <c:when test="${order.paymentStatus == 'refunded'}">Hoàn tiền</c:when>
                                     </c:choose>
                                 </span></td>
-                                <td><a href="${pageContext.request.contextPath}/admin/orders?action=detail&id=${order.orderId}" class="btn-icon">👁️ Chi tiết</a></td>
+                                <td><a href="${pageContext.request.contextPath}/admin/orders?action=detail&id=${order.orderId}" class="btn-icon">Chi tiết</a></td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty orders}">
@@ -77,12 +84,16 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            <!-- Pagination - THÊM GIỮ LẠI PARAMS -->
             <c:if test="${totalPages > 1}">
-                <div class="pagination">
-                    <c:if test="${currentPage > 0}"><a href="?page=${currentPage-1}&status=${param.status}&keyword=${param.keyword}">← Trước</a></c:if>
+                <div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                    <c:if test="${currentPage > 0}">
+                        <a href="?page=${currentPage-1}&status=${param.status}&keyword=${param.keyword}" class="btn-secondary">← Trước</a>
+                    </c:if>
                     <span>Trang ${currentPage+1} / ${totalPages}</span>
-                    <c:if test="${currentPage+1 < totalPages}"><a href="?page=${currentPage+1}&status=${param.status}&keyword=${param.keyword}">Sau →</a></c:if>
+                    <c:if test="${currentPage+1 < totalPages}">
+                        <a href="?page=${currentPage+1}&status=${param.status}&keyword=${param.keyword}" class="btn-secondary">Sau →</a>
+                    </c:if>
                 </div>
             </c:if>
         </main>
