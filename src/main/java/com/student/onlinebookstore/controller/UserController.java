@@ -158,7 +158,12 @@ public class UserController extends HttpServlet {
         
         // User thường
         System.out.println("Regular user, forwarding to home");
-        forwardToHome(request, response);
+        String redirectUrl = request.getParameter("redirectUrl");
+        if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+            response.sendRedirect(redirectUrl);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/home");
+        }
     }
 
     private void forwardToHome(HttpServletRequest request, HttpServletResponse response)

@@ -117,14 +117,14 @@
             <c:when test="${sessionScope.currentUser == null}">
                 <div class="cart-empty">
                     <h3>Vui lòng đăng nhập để xem giỏ hàng</h3>
-                    <a href="${pageContext.request.contextPath}/books">Đăng nhập ngay</a>
+                    <a href="javascript:void(0)" onclick="openModal('login')">Đăng nhập ngay</a>
                 </div>
             </c:when>
             <c:when test="${empty cartItems}">
                 <div class="cart-empty">
                     <h3>Giỏ hàng trống</h3>
                     <p>Hãy thêm sách vào giỏ hàng của bạn!</p>
-                    <a href="${pageContext.request.contextPath}/books">Tiếp tục mua sắm →</a>
+                    <a href="${pageContext.request.contextPath}/books">Tiếp tục mua sắm</a>
                 </div>
             </c:when>
             <c:otherwise>
@@ -251,6 +251,7 @@
         <form action="${pageContext.request.contextPath}/user" method="post">
           <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
           <input type="hidden" name="action" value="login">
+          <input type="hidden" name="redirectUrl" value="${pageContext.request.contextPath}/home"/>
           <div class="modal-form-group">
             <label for="loginUsername">Tên đăng nhập</label>
             <input type="text" id="loginUsername" name="username" placeholder="Nhập tên đăng nhập" required>

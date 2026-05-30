@@ -451,16 +451,6 @@
       btn.innerHTML = '<i class="bi bi-send"></i> <span>Gửi tin nhắn</span>';
     }, 1200);
   });
-
-  /* ── User dropdown ── */
-  (function () {
-    const trigger = document.querySelector('.user-dropdown__trigger');
-    const menu = document.querySelector('.user-dropdown__menu');
-    if (!trigger || !menu) return;
-    trigger.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
-    document.addEventListener('click', () => menu.classList.remove('open'));
-    menu.addEventListener('click', e => e.stopPropagation());
-  })();
 </script>
 <script>
             function openModal(tab) {

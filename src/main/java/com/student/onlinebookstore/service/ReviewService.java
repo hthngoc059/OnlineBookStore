@@ -21,4 +21,6 @@ public interface ReviewService {
     double getAverageRating(Integer bookId);
     int getRatingCount(Integer bookId);
     boolean hasUserReviewed(Integer userId, Integer bookId);
+    
+    int getRatingCountByStar(Integer bookId, int star);
 }

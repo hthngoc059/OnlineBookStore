@@ -67,6 +67,11 @@ public class ReviewController extends HttpServlet {
             int    count = reviewService.getRatingCount(bookId);
             result.put("avgRating",   Math.round(avg * 10.0) / 10.0);
             result.put("reviewCount", count);
+            Map<String, Integer> ratingCounts = new HashMap<>();
+            for (int star = 1; star <= 5; star++) {
+                ratingCounts.put(String.valueOf(star), reviewService.getRatingCountByStar(bookId, star));
+            }
+            result.put("ratingCounts", ratingCounts);
 
         } catch (DuplicateResourceException e) {
             result.put("success", false);

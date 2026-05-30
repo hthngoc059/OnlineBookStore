@@ -4,7 +4,7 @@
 <div class="sidebar">
     <div class="sidebar-header">
         <h2>Admin Panel</h2>
-        <p>Nhà Sách Online</p>
+        <p>storyshop</p>
     </div>
     
     <nav class="sidebar-nav">
@@ -41,7 +41,7 @@
     <div class="sidebar-footer">
         <a href="${pageContext.request.contextPath}/" class="nav-item">
             <span class="nav-icon"></span>
-            <span>Về trang chủ</span>
+            <span>Trở về</span>
         </a>
         <a href="${pageContext.request.contextPath}/user?action=logout" class="nav-item">
             <span class="nav-icon"></span>

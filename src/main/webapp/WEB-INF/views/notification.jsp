@@ -133,9 +133,6 @@
             <div class="notif-empty">
                 <h3>Chưa có thông báo nào</h3>
                 <p>Các thông báo về đơn hàng, sách mới và khuyến mãi sẽ xuất hiện ở đây.</p>
-                <a href="${pageContext.request.contextPath}/books" class="btn-view-more">
-                    Khám phá sách ngay
-                </a>
             </div>
         </c:when>
         <c:otherwise>

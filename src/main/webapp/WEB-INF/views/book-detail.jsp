@@ -14,85 +14,78 @@
 <body>
 
     <nav class="navbar">
-    <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
-    <!--NAV LINKS -->
-    <ul class="navbar__nav">
-        <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
-        <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
-        <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
-        <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
-        <li class="navbar__search-item">
-            <form action="${pageContext.request.contextPath}/books" method="get">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                <input type="hidden" name="action" value="search">
-                <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
-                <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
-            </form>
-        </li>
-        <c:if test="${sessionScope.currentUser.role=='admin'}">
-            <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
-        </c:if>
-    </ul>
-    
-    <div class="navbar__action">
-        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
-            <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="bell"/>
-        </a>
-        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
-            <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="orders"/>
-        </a>
-        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
-            <img src="${pageContext.request.contextPath}/images/online-shopping.png" width="30" height="30" alt="cart"/>
-            <c:if test="${sessionScope.cartCount > 0}">
-                <span class="cart-count">${sessionScope.cartCount}</span>
-            </c:if>
-        </a>
-        <c:choose>
-            <c:when test="${sessionScope.currentUser != null}">
-                <div class="user-dropdown">
-                    <div class="user-dropdown__trigger">
-                        <img src="${pageContext.request.contextPath}/images/user.png" width="26" height="26" alt="user"/>
-                        <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
-                        <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
-                    </div>
-                    <div class="user-dropdown__menu">
-                        <div class="user-dropdown__arrow"></div>
-                        <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
-                            <i class="bi bi-person-circle"></i> Tài khoản của tôi
+            <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
+            <!--NAV LINKS -->
+            <ul class="navbar__nav">
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
+                <li class="navbar__search-item">
+                    <form action="${pageContext.request.contextPath}/books" method="get">
+                        <input type="hidden" 
+                                name="${_csrf.parameterName}" 
+                                value="${_csrf.token}"/>
+                        <input type="hidden" name="action" value="search">
+                        <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
+                        <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
+                    </form>
+                </li>
+                <c:if test="${sessionScope.currentUser.role=='admin'}">
+                    <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
+                </c:if>
+            </ul>
+            <!--USER ACTION-->
+            <div class="navbar__action">
+                        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+                            <img src="${pageContext.request.contextPath}/images/online-shopping.png" width="30" height="30" alt="cart"/>
+                            <c:if test="${sessionScope.cartCount > 0}">
+                                <span class="cart-count">${sessionScope.cartCount}</span>
+                            </c:if>
                         </a>
-                        <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
-                            <i class="bi bi-bag-check"></i> Đơn mua
+                        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
+                            <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="cart"/>
+                          
                         </a>
-                        <div class="user-dropdown__divider"></div>
-                        <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
-                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
+                            <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="cart"/>
+                            
                         </a>
-                    </div>
-                </div>
-            </c:when>
-            <c:otherwise>
-                <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
-            </c:otherwise>
-        </c:choose>
-    </div>
-</nav>
-
-    <div class="detail-container">
-
-        <nav class="breadcrumb">
-            <a href="${pageContext.request.contextPath}/">Trang chủ</a>
-            <span>›</span>
-            <a href="${pageContext.request.contextPath}/books">Tất cả sách</a>
-            <span>›</span>
-            <c:forEach var="genre" items="${book.genres}" varStatus="st">
-                <a href="${pageContext.request.contextPath}/books?genre=${genre.genreId}">${genre.genreName}</a>
-                <c:if test="${!st.last}"><span>,</span></c:if>
-            </c:forEach>
-            <c:if test="${empty book.genres}"><span>Sách</span></c:if>
-            <span>›</span>
-            <span>${book.title}</span>
+                        <c:choose>
+                            <c:when test="${sessionScope.currentUser != null}">
+                                <div class="user-dropdown">
+                                    <div class="user-dropdown__trigger">
+                                        <img src="${pageContext.request.contextPath}/images/user.png" 
+                                             width="26" height="26" alt="user"/>
+                                        <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
+                                        <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+                                    </div>
+                                    <div class="user-dropdown__menu">
+                                        <div class="user-dropdown__arrow"></div>
+                                        <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
+                                            <i class="bi bi-person-circle"></i>
+                                            Tài khoản của tôi
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
+                                            <i class="bi bi-bag-check"></i>
+                                            Đơn mua
+                                        </a>
+                                        <div class="user-dropdown__divider"></div>
+                                        <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            Đăng xuất
+                                        </a>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <%-- User is NOT logged in --%>
+                                <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
+                            </c:otherwise>    
+                        </c:choose>
+            </div>
         </nav>
-
+<div class="detail-container">
         <div class="detail-main">
 
             <div class="detail-cover-wrap">
@@ -149,7 +142,7 @@
                 <!-- Price -->
                 <div class="detail-price-section">
                     <span class="detail-price">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> đ
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> ₫
                     </span>
                     <%-- If you add discounted price in the future, show it here --%>
                 </div>
@@ -656,32 +649,104 @@
             if (action === 'add') {
                 params.append('bookId', bookId);
             } else {
-                // Cần wishlistItemId — lấy từ data attribute
                 params.append('itemId', btn.dataset.itemId);
             }
 
-            try {
-                const resp = await fetch(CTX + '/wishlist?action=' + action, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: params.toString()
-                });
-                const data = await resp.json();
+            const resp = await fetch(CTX + '/wishlist?action=' + action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            const data = await resp.json();
 
-                if (data.success) {
-                    btn.classList.toggle('active');
-                    btn.innerHTML = btn.classList.contains('active')
-                        ? '<span>♥</span> Đã yêu thích'
-                        : '<span>♡</span> Yêu thích';
-                    if (data.itemId) {
-                        btn.dataset.itemId = data.itemId;
+            if (data.success) {
+                btn.classList.toggle('active');
+                btn.innerHTML = btn.classList.contains('active')
+                    ? '<i class="bi bi-heart-fill"></i> Đã yêu thích'
+                    : '<i class="bi bi-heart"></i> Yêu thích';
+            }
+        } // <-- đóng toggleWishlist đúng chỗ
+
+        async function submitReview() {
+            const rating    = parseInt(document.getElementById('ratingInput').value);
+            const comment   = document.getElementById('reviewComment').value.trim();
+            const bookId    = document.getElementById('reviewBookId').value;
+            const csrfName  = document.getElementById('reviewCsrfName').value;
+            const csrfToken = document.getElementById('reviewCsrfToken').value;
+            const alertEl   = document.getElementById('reviewAlert');
+
+            if (!rating || rating < 1) {
+                alertEl.className   = 'modal-alert modal-alert-error';
+                alertEl.textContent = 'Vui lòng chọn số sao đánh giá';
+                alertEl.style.display = 'block';
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append(csrfName, csrfToken);
+            params.append('action',  'add');
+            params.append('bookId',  bookId);
+            params.append('rating',  rating);
+            params.append('comment', comment);
+
+            const res  = await fetch(CTX + '/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const reviewList = document.querySelector('.review-list');
+                const initial = data.username ? data.username.charAt(0).toUpperCase() : '?';
+                const stars = [1,2,3,4,5].map(function(i) {
+                    return '<span class="star ' + (i <= data.rating ? 'filled' : '') + '">★</span>';
+                }).join('');
+                const newCard = '<div class="review-card">'
+                    + '<div class="review-card-header">'
+                    + '<div class="reviewer-avatar">' + initial + '</div>'
+                    + '<div class="reviewer-info">'
+                    + '<div class="reviewer-name">' + data.username + '</div>'
+                    + '<div class="reviewer-date">Vừa xong</div>'
+                    + '</div>'
+                    + '<div class="review-stars">' + stars + '</div>'
+                    + '</div>'
+                    + (data.comment ? '<p class="review-comment">' + data.comment + '</p>' : '')
+                    + '</div>';
+                reviewList.insertAdjacentHTML('afterbegin', newCard);
+
+                const avg = parseFloat(data.avgRating).toFixed(1);
+                document.getElementById('avgScoreBig').textContent = avg;
+                document.getElementById('ratingScore').textContent = avg + '/5';
+                renderStars(document.getElementById('starsDisplay'), data.avgRating);
+                renderStars(document.getElementById('avgStarsBig'),  data.avgRating, '1.1rem');
+                document.querySelector('.rating-count').textContent = '(' + data.reviewCount + ' đánh giá)';
+                document.querySelector('.review-score-big .total').textContent = data.reviewCount + ' đánh giá';
+                if (data.ratingCounts) {
+                    const barsContainer = document.getElementById('ratingBars');
+                    if (barsContainer) {
+                        const total = data.reviewCount;
+                        barsContainer.innerHTML = '';
+                        [5, 4, 3, 2, 1].forEach(star => {
+                            const cnt = data.ratingCounts[String(star)] || 0;
+                            const pct = total > 0 ? (cnt / total * 100) : 0;
+                            barsContainer.innerHTML += '<div class="rating-bar-row">'
+                                + '<span class="rating-bar-label">' + star + ' ★</span>'
+                                + '<div class="rating-bar-track">'
+                                + '<div class="rating-bar-fill" style="width:' + pct + '%"></div>'
+                                + '</div>'
+                                + '<span class="rating-bar-count">' + cnt + '</span>'
+                                + '</div>';
+                        });
                     }
-                } else {
-                    alert(data.message || 'Có lỗi xảy ra');
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra, vui lòng thử lại');
+                document.querySelector('.write-review-box').innerHTML =
+                    '<p style="color:#1a7a3c;font-weight:600;padding:10px;">Cảm ơn bạn đã đánh giá!</p>';
+
+            } else {
+                alertEl.className   = 'modal-alert modal-alert-error';
+                alertEl.textContent = data.message || 'Có lỗi xảy ra, vui lòng thử lại';
+                alertEl.style.display = 'block';
             }
         }
     </script>

@@ -283,4 +283,8 @@ public class ReviewServiceImpl implements ReviewService {
         
         return response;
     }
+    @Override
+    public int getRatingCountByStar(Integer bookId, int star) {
+        return reviewDAO.getRatingCountByStar(bookId, star);
+    }
 }

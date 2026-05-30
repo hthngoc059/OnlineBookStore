@@ -78,7 +78,7 @@
                             <c:otherwise>
                                 <%-- User is NOT logged in --%>
                                 <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
-                            </c:otherwise>
+                            </c:otherwise>    
                         </c:choose>
             </div>
         </nav>
@@ -120,7 +120,7 @@
                                 <div class="book-info">
                                     <h3 class="book-title">${book.title}</h3>
                                     <p class="book-author">${book.author}</p>
-                                    <p class="book-price">${book.priceFormatted}</p>
+                                    <p class="book-price">${book.priceFormatted} ₫</p>
 
                                     <!-- Hiện badge nếu hết hàng -->
                                     <c:if test="${book.stockQuantity == 0}">
@@ -201,9 +201,14 @@
                                </div>
                            </c:forEach>
                        </div>
-                    </main>   
+
+                       <div class="view-more-wrapper">
+                           <a href="${pageContext.request.contextPath}/books?action=genre&name=${entry.key}"
+                              class="btn-view-more">Xem thêm ${entry.key}</a>
+                       </div>
+                   </main>
                </c:forEach>
-            </c:if>                     
+           </c:if>
         <footer>
   <div class="footer__inner">
     <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
@@ -437,27 +442,27 @@
             });
         </script>
         <script>
-            (function() {
-                const trigger = document.querySelector('.user-dropdown__trigger');
-                const menu    = document.querySelector('.user-dropdown__menu');
-                if (!trigger || !menu) return;
+(function() {
+    const trigger = document.querySelector('.user-dropdown__trigger');
+    const menu    = document.querySelector('.user-dropdown__menu');
+    if (!trigger || !menu) return;
 
-                // Bấm vào trigger → toggle menu
-                trigger.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    menu.classList.toggle('open');
-                });
+    // Bấm vào trigger → toggle menu
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('open');
+    });
 
-                // Bấm ra ngoài → đóng menu
-                document.addEventListener('click', function() {
-                    menu.classList.remove('open');
-                });
+    // Bấm ra ngoài → đóng menu
+    document.addEventListener('click', function() {
+        menu.classList.remove('open');
+    });
 
-                // Bấm vào menu không đóng
-                menu.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            })();
-    </script>
+    // Bấm vào menu không đóng
+    menu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+})();
+</script>
     </body>
 </html>
