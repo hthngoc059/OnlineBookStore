@@ -10,14 +10,14 @@
 </head>
 <body>
 
-<%-- ── NAVBAR (same as profile.jsp) ── --%>
+<%-- ── NAVBAR ── --%>
 <nav class="navbar">
     <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
     <ul class="navbar__nav">
-        <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-        <li><a href="${pageContext.request.contextPath}/">Tất cả sách</a></li>
-        <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-        <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
+        <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+        <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+        <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+        <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
         <li class="navbar__search-item">
             <form action="${pageContext.request.contextPath}/books" method="get">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
@@ -36,6 +36,12 @@
             <c:if test="${sessionScope.cartCount > 0}">
                 <span class="cart-count">${sessionScope.cartCount}</span>
             </c:if>
+        </a>
+        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
+            <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="notifications"/>
+        </a>
+        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
+            <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="wishlist"/>
         </a>
         <c:choose>
             <c:when test="${sessionScope.currentUser != null}">
@@ -107,7 +113,6 @@
         <%-- Header --%>
         <div class="addr-mgmt-header">
             <h2>Địa chỉ của tôi</h2>
-            <%-- Nút này trỏ tới address.jsp (form thêm địa chỉ) --%>
             <a href="${pageContext.request.contextPath}/address" class="btn-add-address">
                 <i class="bi bi-plus-lg"></i> Thêm địa chỉ
             </a>
@@ -149,10 +154,8 @@
 
                             <div class="addr-actions">
                                 <div class="addr-action-links">
-                                    <%-- Nút Cập nhật --%>
                                     <a href="${pageContext.request.contextPath}/address?action=edit&id=${addr.addressId}"
                                        class="btn-addr-edit">Cập nhật</a>
-                                    <%-- Nút Xóa (ẩn nếu là địa chỉ mặc định) --%>
                                     <c:if test="${!addr.isDefault}">
                                         <form method="post"
                                               action="${pageContext.request.contextPath}/profile/addresses"
@@ -165,7 +168,6 @@
                                         </form>
                                     </c:if>
                                 </div>
-                                <%-- Nút Thiết lập mặc định (ẩn nếu đã là mặc định) --%>
                                 <c:if test="${!addr.isDefault}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/profile/addresses">
@@ -186,7 +188,26 @@
 </div>
 
 <footer>
-    <p>&copy; 2024 Nhà Sách Online. All rights reserved.</p>
+    <div class="footer__inner">
+        <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
+        <div class="footer__social">
+            <span class="footer__social-label">Theo dõi chúng tôi</span>
+            <div class="footer__social-links">
+                <a href="#" class="footer__social-btn" title="Facebook">
+                    <i class="bi bi-facebook"></i>
+                </a>
+                <a href="#" class="footer__social-btn" title="Instagram">
+                    <i class="bi bi-instagram"></i>
+                </a>
+                <a href="#" class="footer__social-btn" title="Zalo">
+                    <i class="bi bi-chat-dots-fill"></i>
+                </a>
+                <a href="#" class="footer__social-btn" title="YouTube">
+                    <i class="bi bi-youtube"></i>
+                </a>
+            </div>
+        </div>
+    </div>
 </footer>
 
 <script>

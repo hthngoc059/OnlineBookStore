@@ -49,8 +49,24 @@ public class DiscountController extends HttpServlet {
         }
 
         try {
-            BigDecimal totalAmount  = new BigDecimal(totalAmountStr);
-            Discount   discount     = discountService.validateDiscount(code.trim().toUpperCase());
+            BigDecimal totalAmount = new BigDecimal(totalAmountStr);
+            
+            // Lấy user hiện tại từ session
+            com.student.onlinebookstore.model.User currentUser =
+                (com.student.onlinebookstore.model.User) req.getSession().getAttribute("currentUser");
+
+            if (currentUser == null) {
+                result.put("success", false);
+                result.put("message", "Vui lòng đăng nhập để sử dụng mã giảm giá");
+                objectMapper.writeValue(resp.getWriter(), result);
+                return;
+            }
+
+            // Validate discount cho user cụ thể
+            Discount discount = discountService.validateDiscountForUser(
+                code.trim().toUpperCase(), currentUser.getUserId()
+            );
+            
             BigDecimal discountAmt  = discountService.calculateDiscount(totalAmount, discount);
             BigDecimal finalAmount  = totalAmount.subtract(discountAmt);
 

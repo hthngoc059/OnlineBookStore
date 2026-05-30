@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class OrderDAO {
     private static final Logger logger = LoggerFactory.getLogger(OrderDAO.class);
+    
     // SQL Queries
     private static final String SQL_CREATE_ORDER = 
         "INSERT INTO orders (user_id, address_id, total_amount, discount_amount, final_amount, status, payment_status) " +
@@ -26,12 +27,10 @@ public class OrderDAO {
     private static final String SQL_ADD_ORDER_ITEM = 
         "INSERT INTO order_items (order_id, book_id, quantity, price_at_time) VALUES (?, ?, ?, ?)";
     
-    private static final String SQL_GET_ORDER_BY_ID = 
-        "SELECT o.*, u.username, u.email, u.phone_number, " +
-        "a.full_name as address_full_name, a.phone as address_phone, " +
-        "a.address_line, a.ward, a.district, a.city " +
+    private static final String SQL_GET_ORDER_BY_ID =
+        "SELECT o.*, " +
+        "a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
         "FROM orders o " +
-        "LEFT JOIN users u ON o.user_id = u.user_id " +
         "LEFT JOIN addresses a ON o.address_id = a.address_id " +
         "WHERE o.order_id = ?";
     
@@ -40,21 +39,25 @@ public class OrderDAO {
         "FROM order_items oi JOIN books b ON oi.book_id = b.book_id " + 
         "WHERE oi.order_id = ?";
     
-    private static final String SQL_GET_ORDERS_BY_USER = 
-        "SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC LIMIT ? OFFSET ?";
-    
-    private static final String SQL_GET_ALL_ORDERS = 
-        "SELECT o.*, u.username, u.email FROM orders o " + 
-        "LEFT JOIN users u ON o.user_id = u.user_id " +
-        "ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+    private static final String SQL_GET_ORDERS_BY_USER =
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "WHERE o.user_id = ? ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
 
+    private static final String SQL_GET_ALL_ORDERS =
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+    
     private static final String SQL_GET_RECENT_ORDERS_WITH_USER = 
-        "SELECT o.*, u.username, u.email FROM orders o " +
-        "LEFT JOIN users u ON o.user_id = u.user_id " +
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
         "ORDER BY o.order_date DESC LIMIT ?";
-            
-    private static final String SQL_GET_ORDERS_BY_STATUS = 
-        "SELECT * FROM orders WHERE status = ? ORDER BY order_date DESC LIMIT ? OFFSET ?";
+
+    private static final String SQL_GET_ORDERS_BY_STATUS =
+        "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+        "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
+        "WHERE o.status = ? ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
     
     private static final String SQL_UPDATE_ORDER_STATUS = 
         "UPDATE orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
@@ -75,7 +78,7 @@ public class OrderDAO {
         "SELECT COUNT(*) FROM orders WHERE status = ?";
 
     private static final String SQL_UPDATE_ORDER_STATUS_AND_PAYMENT = 
-    "UPDATE orders SET status = ?, payment_status = ?, updated_at = NOW() WHERE order_id = ?";
+        "UPDATE orders SET status = ?, payment_status = ?, updated_at = NOW() WHERE order_id = ?";
     
     // Create order
     public int createOrder(Order order) {
@@ -133,7 +136,7 @@ public class OrderDAO {
         Order order = null;
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ORDER_BY_ID)) {  // Dùng SQL_GET_ORDER_BY_ID
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ORDER_BY_ID)) {
             
             pstmt.setInt(1, orderId);
             
@@ -216,7 +219,7 @@ public class OrderDAO {
         int offset = page * size;
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ALL_ORDERS)) {
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ALL_ORDERS)) {
             
             pstmt.setInt(1, size);
             pstmt.setInt(2, offset);
@@ -260,12 +263,34 @@ public class OrderDAO {
         return orders;
     }
     
+    // Get recent orders with user
+    public List<Order> getRecentOrdersWithUser(int limit) {
+        List<Order> orders = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_RECENT_ORDERS_WITH_USER)) {
+            
+            pstmt.setInt(1, limit);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToOrder(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return orders;
+    }
+    
     // Update order status
     public boolean updateOrderStatus(int orderId, String status) {
         String sql = "UPDATE orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, status);
             pstmt.setInt(2, orderId);
@@ -284,7 +309,7 @@ public class OrderDAO {
         String sql = "UPDATE orders SET payment_status = ?, updated_at = NOW() WHERE order_id = ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, paymentStatus);
             pstmt.setInt(2, orderId);
@@ -377,102 +402,12 @@ public class OrderDAO {
         return count;
     }
     
-    // Map ResultSet to Order object
-    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
-        Order order = new Order();
-        order.setOrderId(rs.getInt("order_id"));
-        order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
-        order.setTotalAmount(rs.getBigDecimal("total_amount"));
-        order.setDiscountAmount(rs.getBigDecimal("discount_amount"));
-        order.setFinalAmount(rs.getBigDecimal("final_amount"));
-        order.setStatus(Order.OrderStatus.valueOf(rs.getString("status")));
-        order.setPaymentStatus(Order.PaymentStatus.valueOf(rs.getString("payment_status")));
-
-        User user = new User();
-        user.setUserId(rs.getInt("user_id"));
-        
-        try {
-            String username = rs.getString("username");
-            if (username != null) {
-                user.setUsername(username);
-            }
-            String email = rs.getString("email");
-            if (email != null) {
-                user.setEmail(email);
-            }
-            String phoneNumber = rs.getString("phone_number");
-            if (phoneNumber != null) {
-                user.setPhoneNumber(phoneNumber);
-            }
-        } catch (SQLException e) {
-            // Ignore
-        }
-        order.setUser(user);
-
-        Address address = new Address();
-        address.setAddressId(rs.getInt("address_id"));
-        try {
-            String fullName = rs.getString("address_full_name");
-            if (fullName != null) {
-                address.setFullName(fullName);
-            }
-            String phone = rs.getString("address_phone");
-            if (phone != null) {
-                address.setPhone(phone);
-            }
-            String addressLine = rs.getString("address_line");
-            if (addressLine != null) {
-                address.setAddressLine(addressLine);
-            }
-            String ward = rs.getString("ward");
-            if (ward != null) {
-                address.setWard(ward);
-            }
-            String district = rs.getString("district");
-            if (district != null) {
-                address.setDistrict(district);
-            }
-            String city = rs.getString("city");
-            if (city != null) {
-                address.setCity(city);
-            }
-        } catch (SQLException e) {
-            // Ignore
-        }
-        order.setAddress(address);
-
-        if (rs.getTimestamp("updated_at") != null) {
-            order.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-        }
-        return order;
-    }
-
-    public List<Order> getRecentOrdersWithUser(int limit) {
-        List<Order> orders = new ArrayList<>();
-        
-        try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(SQL_GET_RECENT_ORDERS_WITH_USER)) {
-            
-            pstmt.setInt(1, limit);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    orders.add(mapResultSetToOrder(rs));
-                }
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return orders;
-    }
-
+    // Update order discount
     public boolean updateOrderDiscount(int orderId, BigDecimal discountAmount, BigDecimal finalAmount) {
         String sql = "UPDATE orders SET discount_amount = ?, final_amount = ?, updated_at = NOW() WHERE order_id = ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setBigDecimal(1, discountAmount);
             pstmt.setBigDecimal(2, finalAmount);
@@ -487,20 +422,39 @@ public class OrderDAO {
         }
     }
 
+    // Update order status and payment together
+    public boolean updateOrderStatusAndPayment(int orderId, String status, String paymentStatus) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_UPDATE_ORDER_STATUS_AND_PAYMENT)) {
+            
+            pstmt.setString(1, status);
+            pstmt.setString(2, paymentStatus);
+            pstmt.setInt(3, orderId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            logger.error("Lỗi khi cập nhật trạng thái đơn hàng: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    // Search orders
     public List<Order> searchOrders(String keyword, int offset, int limit) {
-        String sql = "SELECT o.*, u.username, u.email FROM orders o " +
-                    "LEFT JOIN users u ON o.user_id = u.user_id " +
-                    "WHERE CAST(o.order_id AS CHAR) LIKE ? OR u.username LIKE ? " +
+        String sql = "SELECT o.*, a.full_name, a.phone, a.address_line, a.ward, a.district, a.city " +
+                    "FROM orders o " +
+                    "LEFT JOIN addresses a ON o.address_id = a.address_id " +
+                    "WHERE CAST(o.order_id AS CHAR) LIKE ? " +
                     "ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             String searchPattern = "%" + keyword + "%";
             stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-            stmt.setInt(3, limit);
-            stmt.setInt(4, offset);
+            stmt.setInt(2, limit);
+            stmt.setInt(3, offset);
             
             List<Order> orders = new ArrayList<>();
             ResultSet rs = stmt.executeQuery();
@@ -516,15 +470,13 @@ public class OrderDAO {
 
     public int countSearchOrders(String keyword) {
         String sql = "SELECT COUNT(*) FROM orders o " +
-                    "LEFT JOIN users u ON o.user_id = u.user_id " +
-                    "WHERE CAST(o.order_id AS CHAR) LIKE ? OR u.username LIKE ?";
+                    "WHERE CAST(o.order_id AS CHAR) LIKE ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             String searchPattern = "%" + keyword + "%";
             stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
             
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -534,23 +486,6 @@ public class OrderDAO {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    public boolean updateOrderStatusAndPayment(int orderId, String status, String paymentStatus) {
-        try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(SQL_UPDATE_ORDER_STATUS_AND_PAYMENT)) {
-            
-            pstmt.setString(1, status);
-            pstmt.setString(2, paymentStatus);
-            pstmt.setInt(3, orderId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-            
-        } catch (SQLException e) {
-            logger.error("Lỗi khi cập nhật trạng thái đơn hàng: {}", e.getMessage());
-            return false;
-        }
     }
 
     // Lấy doanh thu theo ngày trong khoảng thời gian
@@ -566,7 +501,7 @@ public class OrderDAO {
                     "ORDER BY date ASC";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setDate(1, Date.valueOf(startDate));
             pstmt.setDate(2, Date.valueOf(endDate));
@@ -597,7 +532,7 @@ public class OrderDAO {
                     "GROUP BY p.payment_method";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setDate(1, Date.valueOf(startDate));
             pstmt.setDate(2, Date.valueOf(endDate));
@@ -631,7 +566,7 @@ public class OrderDAO {
                     "ORDER BY total_sold DESC LIMIT ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setDate(1, Date.valueOf(startDate));
             pstmt.setDate(2, Date.valueOf(endDate));
@@ -654,6 +589,7 @@ public class OrderDAO {
         return topBooks;
     }
 
+    // Count orders by date range
     public int countOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
         String sql = "SELECT COUNT(*) FROM orders o " +
                     "JOIN payments p ON o.order_id = p.order_id " +
@@ -662,7 +598,7 @@ public class OrderDAO {
                     "AND DATE(o.order_date) BETWEEN ? AND ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setDate(1, Date.valueOf(startDate));
             pstmt.setDate(2, Date.valueOf(endDate));
@@ -676,5 +612,39 @@ public class OrderDAO {
             e.printStackTrace();
         }
         return 0;
+    }
+    
+    // Map ResultSet to Order object
+    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+        Order order = new Order();
+        order.setOrderId(rs.getInt("order_id"));
+        order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
+        order.setTotalAmount(rs.getBigDecimal("total_amount"));
+        order.setDiscountAmount(rs.getBigDecimal("discount_amount"));
+        order.setFinalAmount(rs.getBigDecimal("final_amount"));
+        order.setStatus(Order.OrderStatus.valueOf(rs.getString("status")));
+        order.setPaymentStatus(Order.PaymentStatus.valueOf(rs.getString("payment_status")));
+
+        // Set user
+        User user = new User();
+        user.setUserId(rs.getInt("user_id"));
+        order.setUser(user);
+
+        // Set address
+        Address address = new Address();
+        address.setAddressId(rs.getInt("address_id"));
+        address.setFullName(rs.getString("full_name"));
+        address.setPhone(rs.getString("phone"));
+        address.setAddressLine(rs.getString("address_line"));
+        address.setWard(rs.getString("ward"));
+        address.setDistrict(rs.getString("district"));
+        address.setCity(rs.getString("city"));
+        order.setAddress(address);
+
+        if (rs.getTimestamp("updated_at") != null) {
+            order.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+        }
+        
+        return order;
     }
 }

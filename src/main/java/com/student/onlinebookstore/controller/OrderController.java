@@ -173,7 +173,20 @@ public class OrderController extends HttpServlet {
             request.setDiscountCode(discountCode);
 
             OrderResponse order = orderService.createOrder(user.getUserId(), request);
-
+                    if (discountCode != null && !discountCode.isBlank()) {
+            String discountIdStr = req.getParameter("discountId");
+            if (discountIdStr != null && !discountIdStr.isBlank()) {
+                try {
+                    DiscountDAO discountDAO = ApplicationContextProvider.getBean(DiscountDAO.class);
+                    discountDAO.saveUserDiscountUsage(
+                        user.getUserId(), 
+                        Integer.parseInt(discountIdStr)
+                    );
+                } catch (Exception e) {
+                    logger.warn("Không thể lưu user discount usage: {}", e.getMessage());
+                }
+            }
+        }
             // Xóa giỏ hàng
             Cart cart = cartDAO.getCartByUserId(user.getUserId());
             if (cart != null) {

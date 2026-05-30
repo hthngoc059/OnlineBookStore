@@ -9,7 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FileUploadUtil {
     
     private static final Logger logger = LoggerFactory.getLogger(FileUploadUtil.class);

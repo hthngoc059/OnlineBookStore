@@ -523,4 +523,52 @@ public class BookDAO {
         }
         return genres;
     }
+    // Lấy tất cả genre có sách, kèm sách (dùng cho trang chủ)
+    private static final String SQL_GET_ALL_GENRES =
+        "SELECT DISTINCT g.genre_id, g.genre_name FROM genres g " +
+        "JOIN book_genre bg ON g.genre_id = bg.genre_id " +
+        "JOIN books b ON bg.book_id = b.book_id " +
+        "WHERE b.is_available = 1 " +
+        "ORDER BY g.genre_name";
+
+    public List<com.student.onlinebookstore.model.Genre> getAllGenresWithBooks() {
+        List<com.student.onlinebookstore.model.Genre> genres = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_ALL_GENRES);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                com.student.onlinebookstore.model.Genre g = new com.student.onlinebookstore.model.Genre();
+                g.setGenreId(rs.getInt("genre_id"));
+                g.setGenreName(rs.getString("genre_name"));
+                genres.add(g);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return genres;
+    }
+
+    // Lấy sách theo genreId, giới hạn số lượng
+    private static final String SQL_GET_BOOKS_BY_GENRE_ID =
+        "SELECT b.* FROM books b " +
+        "JOIN book_genre bg ON b.book_id = bg.book_id " +
+        "WHERE bg.genre_id = ? AND b.is_available = 1 " +
+        "ORDER BY b.created_at DESC LIMIT ?";
+
+    public List<Book> getBooksByGenreId(int genreId, int limit) {
+        List<Book> books = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_BOOKS_BY_GENRE_ID)) {
+            pstmt.setInt(1, genreId);
+            pstmt.setInt(2, limit);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    books.add(mapResultSetToBook(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
 }

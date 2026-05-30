@@ -270,12 +270,29 @@ public class UserDAO {
         }
     }
     
+    // Update phone number
+    public boolean updatePhoneNumber(int userId, String phoneNumber) {
+        String sql = "UPDATE users SET phone_number = ?, updated_at = NOW() WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, phoneNumber);
+            pstmt.setInt(2, userId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
     // Delete user by ID
     public boolean deleteUser(int userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
             int rowsAffected = pstmt.executeUpdate();
@@ -334,45 +351,14 @@ public class UserDAO {
         return exists;
     }
     
-    // ResultSet to User object
-    private User mapResultSetToUser(ResultSet rs) throws SQLException {
-        User user = new User();
-        user.setUserId(rs.getInt("user_id"));
-        user.setUsername(rs.getString("username"));
-        user.setEmail(rs.getString("email"));
-        user.setPassword(rs.getString("password"));
-        user.setPhoneNumber(rs.getString("phone_number"));
-        user.setRole(User.Role.valueOf(rs.getString("role")));
-        user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        if (rs.getTimestamp("updated_at") != null) {
-            user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-        }
-        return user;
-    }
-
-    public boolean updatePhoneNumber(int userId, String phoneNumber) {
-        String sql = "UPDATE users SET phone_number = ?, updated_at = NOW() WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, phoneNumber);
-            pstmt.setInt(2, userId);
-
-            return pstmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
+    // Search users by keyword
     public List<User> searchUsers(String keyword, int page, int size) {
         List<User> users = new ArrayList<>();
         int offset = page * size;
         String sql = "SELECT * FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY user_id DESC LIMIT ? OFFSET ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             String searchPattern = "%" + keyword + "%";
             pstmt.setString(1, searchPattern);
@@ -399,7 +385,7 @@ public class UserDAO {
         String sql = "SELECT COUNT(*) FROM users WHERE username LIKE ? OR email LIKE ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             String searchPattern = "%" + keyword + "%";
             pstmt.setString(1, searchPattern);
@@ -425,7 +411,7 @@ public class UserDAO {
         String sql = "SELECT * FROM users WHERE role = ? ORDER BY user_id DESC LIMIT ? OFFSET ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, role);
             pstmt.setInt(2, size);
@@ -450,7 +436,7 @@ public class UserDAO {
         String sql = "SELECT COUNT(*) FROM users WHERE role = ?";
         
         try (Connection conn = DBConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, role);
             
@@ -465,5 +451,21 @@ public class UserDAO {
         }
         
         return count;
+    }
+    
+    // ResultSet to User object
+    private User mapResultSetToUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUserId(rs.getInt("user_id"));
+        user.setUsername(rs.getString("username"));
+        user.setEmail(rs.getString("email"));
+        user.setPassword(rs.getString("password"));
+        user.setPhoneNumber(rs.getString("phone_number"));
+        user.setRole(User.Role.valueOf(rs.getString("role")));
+        user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        if (rs.getTimestamp("updated_at") != null) {
+            user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+        }
+        return user;
     }
 }

@@ -1,18 +1,18 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib uri="jakarta.tags.core" prefix="c" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="jakarta.tags.core"      prefix="c" %>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đặt hàng - Nhà Sách Online</title>
+    <title>Thông báo – Nhà Sách Online</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 </head>
 <body>
 
-<!-- ===== NAVBAR ===== -->
+<!-- ═══════════ NAVBAR ═══════════ -->
 <nav class="navbar">
             <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
             <!--NAV LINKS -->
@@ -86,84 +86,131 @@
             </div>
         </nav>
 
-<!-- ===== NỘI DUNG ===== -->
-<div class="order-history-container">
-    <div class="section-header" style="margin-bottom: 28px;">
-        <h2 class="section-title">Lịch sử đặt hàng</h2>
+<!-- ═══════════ PAGE HEADER ═══════════ -->
+<div class="notif-page-header">
+    <div class="notif-page-header__inner">
+        <div class="search-breadcrumb">
+            <a href="${pageContext.request.contextPath}/home">Trang chủ</a>
+            <span>›</span>
+            <span>Thông báo</span>
+        </div>
+        <div class="notif-page-title-row">
+            <h2 class="notif-page-title">
+                Thông báo
+                <c:if test="${unreadCount > 0}">
+                    <span class="notif-unread-chip">${unreadCount} chưa đọc</span>
+                </c:if>
+            </h2>
+            <div class="notif-bulk-actions">
+                <c:if test="${unreadCount > 0}">
+                    <form action="${pageContext.request.contextPath}/notifications"
+                          method="post" style="display:inline;">
+                        <input type="hidden" name="action" value="markAllRead">
+                        <button type="submit" class="btn-notif-action btn-notif-action--secondary">
+                            ✓ Đánh dấu tất cả đã đọc
+                        </button>
+                    </form>
+                </c:if>
+                <c:if test="${totalCount > 0}">
+                    <form action="${pageContext.request.contextPath}/notifications"
+                          method="post" style="display:inline;"
+                          onsubmit="return confirm('Xóa tất cả thông báo?')">
+                        <input type="hidden" name="action" value="deleteAll">
+                        <button type="submit" class="btn-notif-action btn-notif-action--danger">
+                            🗑 Xóa tất cả
+                        </button>
+                    </form>
+                </c:if>
+            </div>
+        </div>
     </div>
+</div>
 
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="notif-container">
     <c:choose>
-        <c:when test="${empty orders}">
-            <div class="cart-empty">
-                <h3>Bạn chưa có đơn hàng nào</h3>
-                <p>Hãy khám phá và mua sắm ngay!</p>
-                <a href="${pageContext.request.contextPath}/books">Tiếp tục mua sắm</a>
+        <c:when test="${empty notifications}">
+            <div class="notif-empty">
+                <h3>Chưa có thông báo nào</h3>
+                <p>Các thông báo về đơn hàng, sách mới và khuyến mãi sẽ xuất hiện ở đây.</p>
+                <a href="${pageContext.request.contextPath}/books" class="btn-view-more">
+                    Khám phá sách ngay
+                </a>
             </div>
         </c:when>
         <c:otherwise>
-            <table class="cart-table">
-                <thead>
-                    <tr>
-                        <th>Mã đơn</th>
-                        <th>Ngày đặt</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thanh toán</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="order" items="${orders}">
-                        <tr>
-                            <td data-label="Mã đơn">
-                                <a href="${pageContext.request.contextPath}/orders/${order.orderId}"
-                                   style="color:#405a28; font-weight:700; text-decoration:none;">
-                                    #${order.orderId}
-                                </a>
-                            </td>
-                            <td data-label="Ngày đặt">${order.orderDateFormatted}</td>
-                            <td data-label="Tổng tiền" class="cart-price">
-                                <fmt:formatNumber value="${order.totalAmount}"
-                                                  type="number" maxFractionDigits="0"/>đ
-                            </td>
-                            <td data-label="Trạng thái">
-                                <span class="order-status order-status--${order.status}">
-                                    ${order.status}
-                                </span>
-                            </td>
-                            <td data-label="Thanh toán">${order.paymentStatus}</td>
-                            <td data-label="Chi tiết">
-                                <a href="${pageContext.request.contextPath}/orders/${order.orderId}"
-                                   class="btn-detail"
-                                   style="display:inline-block; padding:6px 16px; font-size:0.78rem;">
-                                    Xem chi tiết
-                                </a>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+            <div class="notif-list">
+                <c:forEach var="notif" items="${notifications}">
+                    <div class="notif-item ${notif.isRead ? '' : 'notif-item--unread'}">
 
-            <%-- Pagination --%>
+                        <!-- Icon: resolved in Java Controller to avoid JSTL Unicode issues -->
+                        <div class="notif-item__icon">
+                            ${iconMap[notif.notificationId]}
+                        </div>
+
+                        <!-- Content -->
+                        <div class="notif-item__body">
+                            <div class="notif-item__title">
+                                <c:if test="${!notif.isRead}">
+                                    <span class="notif-dot"></span>
+                                </c:if>
+                                <c:out value="${notif.title}"/>
+                            </div>
+                            <div class="notif-item__message">
+                                <c:out value="${notif.message}"/>
+                            </div>
+                            <%-- Dùng dateMap (String) thay vì fmt:formatDate để tránh lỗi LocalDateTime --%>
+                            <div class="notif-item__meta">
+                                ${dateMap[notif.notificationId]}
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="notif-item__actions">
+                            <c:if test="${!notif.isRead}">
+                                <form action="${pageContext.request.contextPath}/notifications"
+                                      method="post" style="display:inline;">
+                                    <input type="hidden" name="action" value="markRead">
+                                    <input type="hidden" name="id" value="${notif.notificationId}">
+                                    <button type="submit" class="notif-btn-read" title="Đánh dấu đã đọc">✓</button>
+                                </form>
+                            </c:if>
+                            <form action="${pageContext.request.contextPath}/notifications"
+                                  method="post" style="display:inline;">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="id" value="${notif.notificationId}">
+                                <button type="submit" class="notif-btn-delete"
+                                        title="Xóa thông báo"
+                                        onclick="return confirm('Xóa thông báo này?')">✕</button>
+                            </form>
+                        </div>
+
+                    </div>
+                </c:forEach>
+            </div>
+
+            <!-- Pagination -->
             <c:if test="${totalPages > 1}">
-                <div style="text-align:center; margin-top: 32px; display:flex;
-                            justify-content:center; gap:8px;">
+                <div class="notif-pagination">
+                    <c:if test="${currentPage > 0}">
+                        <a href="${pageContext.request.contextPath}/notifications?page=${currentPage - 1}"
+                           class="notif-page-btn">← Trước</a>
+                    </c:if>
                     <c:forEach begin="0" end="${totalPages - 1}" var="p">
-                        <a href="${pageContext.request.contextPath}/orders?page=${p}"
-                           style="padding: 8px 14px; border-radius: 20px; border: 2px solid #405a28;
-                                  font-weight: 700; font-size: 0.85rem;
-                                  background: ${p == currentPage ? '#405a28' : '#fff'};
-                                  color: ${p == currentPage ? '#fff' : '#405a28'};">
-                            ${p + 1}
-                        </a>
+                        <a href="${pageContext.request.contextPath}/notifications?page=${p}"
+                           class="notif-page-btn ${p == currentPage ? 'active' : ''}">${p + 1}</a>
                     </c:forEach>
+                    <c:if test="${currentPage < totalPages - 1}">
+                        <a href="${pageContext.request.contextPath}/notifications?page=${currentPage + 1}"
+                           class="notif-page-btn">Tiếp →</a>
+                    </c:if>
                 </div>
             </c:if>
+
         </c:otherwise>
     </c:choose>
-</div>
+</main>
 
-<!-- ===== FOOTER ===== -->
 <footer>
   <div class="footer__inner">
     <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
@@ -187,58 +234,19 @@
   </div>
 </footer>
 
-<!-- ===== MODAL ĐẶT HÀNG THÀNH CÔNG ===== -->
-<c:if test="${orderSuccess == true}">
-<div id="successModal" style="display:flex; position:fixed; inset:0;
-     background:rgba(0,0,0,0.52); z-index:9999;
-     align-items:center; justify-content:center; padding:20px;">
-    <div class="success-modal-box">
-        <div class="success-modal-header">
-            <div class="success-modal-icon">✓</div>
-            <h2>Đặt hàng thành công!</h2>
-            <p>Cảm ơn bạn. Đơn hàng đang được xử lý.</p>
-        </div>
-        <div class="success-modal-body">
-            <div class="success-modal-btns">
-                <a href="${pageContext.request.contextPath}/"
-                   class="btn-modal-continue">Tiếp tục mua sắm</a>
-                <a href="javascript:void(0)" onclick="closeSuccessModal()"
-                   class="btn-modal-view">Xem đơn hàng →</a>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    function closeSuccessModal() {
-        document.getElementById('successModal').style.display = 'none';
-    }
-    document.getElementById('successModal').addEventListener('click', function(e) {
-        if (e.target === this) closeSuccessModal();
-    });
-</script>
-</c:if>
 <script>
 (function() {
-    const trigger = document.querySelector('.user-dropdown__trigger');
-    const menu    = document.querySelector('.user-dropdown__menu');
+    var trigger = document.querySelector('.user-dropdown__trigger');
+    var menu    = document.querySelector('.user-dropdown__menu');
     if (!trigger || !menu) return;
-
-    // Bấm vào trigger → toggle menu
     trigger.addEventListener('click', function(e) {
         e.stopPropagation();
         menu.classList.toggle('open');
     });
-
-    // Bấm ra ngoài → đóng menu
-    document.addEventListener('click', function() {
-        menu.classList.remove('open');
-    });
-
-    // Bấm vào menu không đóng
-    menu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
+    document.addEventListener('click', function() { menu.classList.remove('open'); });
+    menu.addEventListener('click', function(e) { e.stopPropagation(); });
 })();
 </script>
+
 </body>
 </html>

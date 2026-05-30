@@ -9,37 +9,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${book.title} - Nhà Sách Online</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 </head>
 <body>
 
     <nav class="navbar">
-        <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
-        <ul class="navbar__nav">
-            <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-            <li><a href="${pageContext.request.contextPath}/">Tất cả sách</a></li>
-            <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-            <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
-            <li class="navbar__search-item">
-                <form action="${pageContext.request.contextPath}/books" method="get">
-                    <input type="hidden" 
-           name="${_csrf.parameterName}" 
-           value="${_csrf.token}"/>
-                    <input type="hidden" name="action" value="search">
-                    <input type="text" name="keyword" placeholder="Tìm sách..." autocomplete="off">
-                    <button type="submit">
-                        <img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/>
-                    </button>
-                </form>
-            </li>
-            <c:if test="${sessionScope.currentUser.role=='admin'}">
-                <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
-            </c:if>
-        </ul>
-        <div class="navbar__action">
-            <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
-                <img src="${pageContext.request.contextPath}/images/online-shopping.png" width="30" height="30" alt="cart"/>
-                <c:if test="${sessionScope.cartCount > 0}">
-                    <span class="cart-count">${sessionScope.cartCount}</span>
+            <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
+            <!--NAV LINKS -->
+            <ul class="navbar__nav">
+                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
+                <li class="navbar__search-item">
+                    <form action="${pageContext.request.contextPath}/books" method="get">
+                        <input type="hidden" 
+                                name="${_csrf.parameterName}" 
+                                value="${_csrf.token}"/>
+                        <input type="hidden" name="action" value="search">
+                        <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
+                        <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
+                    </form>
+                </li>
+                <c:if test="${sessionScope.currentUser.role=='admin'}">
+                    <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
                 </c:if>
             </a>
             <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
@@ -368,36 +361,28 @@
 
         <!-- Write review -->
         <div class="write-review-box">
-            <p class="write-review-title">✍️ Viết đánh giá của bạn</p>
+            <p class="write-review-title">Viết đánh giá của bạn</p>
             <c:choose>
                 <c:when test="${sessionScope.currentUser != null}">
-                    <c:if test="${not empty reviewSuccess}">
-                        <div class="modal-alert modal-alert-success">${reviewSuccess}</div>
-                    </c:if>
-                    <c:if test="${not empty reviewError}">
-                        <div class="modal-alert modal-alert-error">${reviewError}</div>
-                    </c:if>
-                    <form action="${pageContext.request.contextPath}/reviews" method="post">
-                        <input type="hidden" 
-           name="${_csrf.parameterName}" 
-           value="${_csrf.token}"/>
-                        <input type="hidden" name="action" value="add">
-                        <input type="hidden" name="bookId" value="${book.bookId}">
-                        <input type="hidden" name="rating" id="ratingInput" value="0">
+                    <div id="reviewAlert" style="display:none;"></div>
 
-                        <div class="star-picker" id="starPicker">
-                            <span class="star-pick" data-value="1">★</span>
-                            <span class="star-pick" data-value="2">★</span>
-                            <span class="star-pick" data-value="3">★</span>
-                            <span class="star-pick" data-value="4">★</span>
-                            <span class="star-pick" data-value="5">★</span>
-                        </div>
+                    <input type="hidden" id="reviewBookId"    value="${book.bookId}"/>
+                    <input type="hidden" id="reviewCsrfName"  value="${_csrf.parameterName}"/>
+                    <input type="hidden" id="reviewCsrfToken" value="${_csrf.token}"/>
+                    <input type="hidden" id="ratingInput"     value="0"/>
 
-                        <textarea class="review-textarea" name="comment"
-                                  placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
+                    <div class="star-picker" id="starPicker">
+                        <span class="star-pick" data-value="1">★</span>
+                        <span class="star-pick" data-value="2">★</span>
+                        <span class="star-pick" data-value="3">★</span>
+                        <span class="star-pick" data-value="4">★</span>
+                        <span class="star-pick" data-value="5">★</span>
+                    </div>
 
-                        <button type="submit" class="btn-submit-review">Gửi đánh giá</button>
-                    </form>
+                    <textarea class="review-textarea" id="reviewComment"
+                              placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
+
+                    <button type="button" class="btn-submit-review" onclick="submitReview()">Gửi đánh giá</button>
                 </c:when>
                 <c:otherwise>
                     <p class="login-to-review">
@@ -408,20 +393,37 @@
             </c:choose>
         </div>
     </div>
-
     <!-- ===== FOOTER ===== -->
     <footer>
-        <p>&copy; 2024 Nhà Sách Online. All rights reserved.</p>
-    </footer>
+  <div class="footer__inner">
+    <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
+    <div class="footer__social">
+      <span class="footer__social-label">Theo dõi chúng tôi</span>
+      <div class="footer__social-links">
+        <a href="#" class="footer__social-btn" title="Facebook">
+          <i class="bi bi-facebook"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Instagram">
+          <i class="bi bi-instagram"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="Zalo">
+          <i class="bi bi-chat-dots-fill"></i>
+        </a>
+        <a href="#" class="footer__social-btn" title="YouTube">
+          <i class="bi bi-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
 
     <!-- ===== AUTH MODAL (same as home.jsp) ===== -->
     <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event)">
         <div class="modal-box">
             <div class="modal-left">
-                <div class="modal-left-icon">📚</div>
-                <h3>Nhà Sách Online</h3>
+                <img src="${pageContext.request.contextPath}/images/login.png" width="100" height="100">
                 <p>Khám phá hàng nghìn đầu sách hay. Đặt hàng nhanh, giao tận nơi.</p>
-                <span class="promo-badge">🎁 Giảm 10% đơn đầu tiên</span>
+                <span class="promo-badge">Giảm 10% đơn đầu tiên</span>
             </div>
             <div class="modal-right">
                 <button class="modal-close" onclick="closeModal()">✕</button>
@@ -487,7 +489,7 @@
         // ---- Data from server ----
         const MAX_QTY    = ${book.stockQuantity};
         const BOOK_ID    = ${book.bookId};
-        const AVG_RATING = ${avgRating != null ? avgRating : 0};
+        const AVG_RATING = ${not empty avgRating ? avgRating : 0};
         const CTX        = '${pageContext.request.contextPath}';
 
         // ---- Render stars helper ----
@@ -524,25 +526,24 @@
             const barsContainer = document.getElementById('ratingBars');
             if (barsContainer) {
                 const counts = {
-                    5: ${ratingCounts[5] != null ? ratingCounts[5] : 0},
-                    4: ${ratingCounts[4] != null ? ratingCounts[4] : 0},
-                    3: ${ratingCounts[3] != null ? ratingCounts[3] : 0},
-                    2: ${ratingCounts[2] != null ? ratingCounts[2] : 0},
-                    1: ${ratingCounts[1] != null ? ratingCounts[1] : 0}
+                    5: parseInt('${ratingCounts["5"]}') || 0,
+                    4: parseInt('${ratingCounts["4"]}') || 0,
+                    3: parseInt('${ratingCounts["3"]}') || 0,
+                    2: parseInt('${ratingCounts["2"]}') || 0,
+                    1: parseInt('${ratingCounts["1"]}') || 0
                 };
                 const total = Object.values(counts).reduce((a, b) => a + b, 0);
                 barsContainer.innerHTML = '';
                 [5, 4, 3, 2, 1].forEach(star => {
                     const cnt = counts[star] || 0;
                     const pct = total > 0 ? (cnt / total * 100) : 0;
-                    barsContainer.innerHTML += `
-                        <div class="rating-bar-row">
-                            <span class="rating-bar-label">${star} ★</span>
-                            <div class="rating-bar-track">
-                                <div class="rating-bar-fill" style="width:${pct}%"></div>
-                            </div>
-                            <span class="rating-bar-count">${cnt}</span>
-                        </div>`;
+                    barsContainer.innerHTML += '<div class="rating-bar-row">'
+                        + '<span class="rating-bar-label">' + star + ' ★</span>'
+                        + '<div class="rating-bar-track">'
+                        + '<div class="rating-bar-fill" style="width:' + pct + '%"></div>'
+                        + '</div>'
+                        + '<span class="rating-bar-count">' + cnt + '</span>'
+                        + '</div>';
                 });
             }
 
