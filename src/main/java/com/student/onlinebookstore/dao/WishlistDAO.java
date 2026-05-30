@@ -11,9 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class WishlistDAO {
     // SQL Queries
-    private static final String SQL_GET_OR_CREATE_WISHLIST = 
-        "INSERT INTO wishlists (user_id) VALUES (?) ON DUPLICATE KEY UPDATE wishlist_id = wishlist_id";
-    
     private static final String SQL_ADD_ITEM = 
         "INSERT INTO wishlist_items (wishlist_id, book_id) VALUES (?, ?) " +
         "ON DUPLICATE KEY UPDATE wishlist_item_id = wishlist_item_id";

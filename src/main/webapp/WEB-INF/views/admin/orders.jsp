@@ -21,6 +21,33 @@
                     <p>Xem và cập nhật trạng thái đơn hàng</p>
                 </div>
             </header>
+            
+            <!-- Hiển thị thông báo -->
+            <c:if test="${not empty successMessage}">
+                <div class="alert-card"
+                     style="border-left-color: #2e7d32;
+                            background: #e8f5e9;
+                            margin-bottom: 20px;">
+                    <div class="alert-icon">✔</div>
+                    <div class="alert-content">
+                        <h4 style="color:#2e7d32;">
+                            ${successMessage}
+                        </h4>
+                    </div>
+                </div>
+                <% session.removeAttribute("successMessage"); %>
+            </c:if>
+
+            <c:if test="${not empty errorMessage}">
+                <div class="alert-card warning"
+                     style="margin-bottom: 20px;">
+                    <div class="alert-icon">❌</div>
+                    <div class="alert-content">
+                        <h4>${errorMessage}</h4>
+                    </div>
+                </div>
+                <% session.removeAttribute("errorMessage"); %>
+            </c:if>
 
             <!-- Filter Bar - THÊM METHOD GET ĐỂ SEARCH HOẠT ĐỘNG -->
             <div class="filter-bar">

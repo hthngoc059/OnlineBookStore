@@ -2,7 +2,6 @@ package com.student.onlinebookstore.controller;
 
 import com.student.onlinebookstore.config.ApplicationContextProvider;
 import com.student.onlinebookstore.dto.request.ReviewRequest;
-import com.student.onlinebookstore.dto.response.ReviewResponse;
 import com.student.onlinebookstore.exception.DuplicateResourceException;
 import com.student.onlinebookstore.model.User;
 import com.student.onlinebookstore.service.ReviewService;

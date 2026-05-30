@@ -197,4 +197,5 @@ public class BookController extends HttpServlet {
         // → search.jsp đóng vai "trang tất cả sách"
         request.getRequestDispatcher("/WEB-INF/views/search.jsp")
                .forward(request, response);
+    }
 }

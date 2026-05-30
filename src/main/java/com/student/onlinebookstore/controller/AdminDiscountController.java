@@ -137,6 +137,11 @@ public class AdminDiscountController extends HttpServlet {
                     discount.setMaxUsage(null);
                 }
                 
+                String isActiveStr = req.getParameter("isActive");
+                if (isActiveStr != null) {
+                    discount.setIsActive(Boolean.parseBoolean(isActiveStr));
+                }
+                
                 boolean updated = discountDAO.updateDiscount(discount);
                 
                 if (updated) {
@@ -145,9 +150,10 @@ public class AdminDiscountController extends HttpServlet {
                     req.getSession().setAttribute("errorMsg", "Cập nhật mã giảm giá thất bại!");
                 }
             }
-            
+              
             resp.sendRedirect(req.getContextPath() + "/admin/discounts");
         }
+            
     }
     
     private boolean isAdmin(HttpServletRequest req, HttpServletResponse resp) throws IOException {

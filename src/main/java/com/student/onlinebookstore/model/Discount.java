@@ -69,9 +69,12 @@ public class Discount {
         if (discountValue == null) return "0";
         
         if (discountType == DiscountType.percent) {
-            return String.format("%.0f%%", discountValue);
+            // Chuyển BigDecimal thành số nguyên (bỏ phần thập phân)
+            return discountValue.intValue() + "%";
         } else {
-            return String.format("%,.0f", discountValue).replace(",", ".");
+            // Format số tiền với dấu chấm phân cách
+            java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+            return df.format(discountValue).replace(",", ".") + "đ";
         }
     }
     

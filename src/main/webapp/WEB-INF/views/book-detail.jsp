@@ -14,66 +14,68 @@
 <body>
 
     <nav class="navbar">
-            <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
-            <!--NAV LINKS -->
-            <ul class="navbar__nav">
-                <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
-                <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
-                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
-                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
-                <li class="navbar__search-item">
-                    <form action="${pageContext.request.contextPath}/books" method="get">
-                        <input type="hidden" 
-                                name="${_csrf.parameterName}" 
-                                value="${_csrf.token}"/>
-                        <input type="hidden" name="action" value="search">
-                        <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
-                        <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
-                    </form>
-                </li>
-                <c:if test="${sessionScope.currentUser.role=='admin'}">
-                    <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
-                </c:if>
-            </a>
-            <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
-                <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="bell"/>
-            </a>
-            <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
-                <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="orders"/>
-            </a>
-            <c:choose>
-                <c:when test="${sessionScope.currentUser != null}">
-                    <div class="user-dropdown">
-                        <div class="user-dropdown__trigger">
-                            <img src="${pageContext.request.contextPath}/images/user.png" 
-                                 width="26" height="26" alt="user"/>
-                            <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
-                            <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
-                        </div>
-                        <div class="user-dropdown__menu">
-                            <div class="user-dropdown__arrow"></div>
-                            <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
-                                <i class="bi bi-person-circle"></i>
-                                Tài khoản của tôi
-                            </a>
-                            <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
-                                <i class="bi bi-bag-check"></i>
-                                Đơn mua
-                            </a>
-                            <div class="user-dropdown__divider"></div>
-                            <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
-                                <i class="bi bi-box-arrow-right"></i>
-                                Đăng xuất
-                            </a>
-                        </div>
+    <h1><img src="${pageContext.request.contextPath}/images/Logo.png" width="125" height="125"></h1>
+    <!--NAV LINKS -->
+    <ul class="navbar__nav">
+        <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
+        <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
+        <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+        <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
+        <li class="navbar__search-item">
+            <form action="${pageContext.request.contextPath}/books" method="get">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" name="action" value="search">
+                <input type="text" name="keyword" placeholder="Tìm sách..." value="${param.keyword}" autocomplete="off">
+                <button type="submit"><img src="${pageContext.request.contextPath}/images/magnifying-glass.png" width="30" height="30" alt="search"/></button>
+            </form>
+        </li>
+        <c:if test="${sessionScope.currentUser.role=='admin'}">
+            <li><a href="${pageContext.request.contextPath}/admin/dashboard">Dành cho quản trị viên</a></li>
+        </c:if>
+    </ul>
+    
+    <div class="navbar__action">
+        <a href="${pageContext.request.contextPath}/notifications" class="btn-cart">
+            <img src="${pageContext.request.contextPath}/images/bell.png" width="30" height="30" alt="bell"/>
+        </a>
+        <a href="${pageContext.request.contextPath}/wishlist" class="btn-cart">
+            <img src="${pageContext.request.contextPath}/images/e-commerce.png" width="30" height="30" alt="orders"/>
+        </a>
+        <a href="${pageContext.request.contextPath}/cart" class="btn-cart">
+            <img src="${pageContext.request.contextPath}/images/online-shopping.png" width="30" height="30" alt="cart"/>
+            <c:if test="${sessionScope.cartCount > 0}">
+                <span class="cart-count">${sessionScope.cartCount}</span>
+            </c:if>
+        </a>
+        <c:choose>
+            <c:when test="${sessionScope.currentUser != null}">
+                <div class="user-dropdown">
+                    <div class="user-dropdown__trigger">
+                        <img src="${pageContext.request.contextPath}/images/user.png" width="26" height="26" alt="user"/>
+                        <span>Xin chào, <strong>${sessionScope.currentUser.username}</strong></span>
+                        <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
                     </div>
-                </c:when>
-                <c:otherwise>
-                    <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </nav>
+                    <div class="user-dropdown__menu">
+                        <div class="user-dropdown__arrow"></div>
+                        <a href="${pageContext.request.contextPath}/profile" class="user-dropdown__item">
+                            <i class="bi bi-person-circle"></i> Tài khoản của tôi
+                        </a>
+                        <a href="${pageContext.request.contextPath}/orders" class="user-dropdown__item">
+                            <i class="bi bi-bag-check"></i> Đơn mua
+                        </a>
+                        <div class="user-dropdown__divider"></div>
+                        <a href="${pageContext.request.contextPath}/user?action=logout" class="user-dropdown__item user-dropdown__item--logout">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
+            </c:otherwise>
+        </c:choose>
+    </div>
+</nav>
 
     <div class="detail-container">
 
@@ -147,7 +149,7 @@
                 <!-- Price -->
                 <div class="detail-price-section">
                     <span class="detail-price">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> ₫
+                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> đ
                     </span>
                     <%-- If you add discounted price in the future, show it here --%>
                 </div>
@@ -645,33 +647,43 @@
             if (modal) modal.style.display = 'none';
         });
         async function toggleWishlist(bookId, btn) {
-        const inWishlist = btn.classList.contains('active');
-        const action = inWishlist ? 'remove' : 'add';
+            const inWishlist = btn.classList.contains('active');
+            const action = inWishlist ? 'remove' : 'add';
 
-        const params = new URLSearchParams();
-        params.append('${_csrf.parameterName}', '${_csrf.token}');
+            const params = new URLSearchParams();
+            params.append('${_csrf.parameterName}', '${_csrf.token}');
 
-        if (action === 'add') {
-          params.append('bookId', bookId);
-        } else {
-          // Cần wishlistItemId — lấy từ data attribute
-          params.append('itemId', btn.dataset.itemId);
+            if (action === 'add') {
+                params.append('bookId', bookId);
+            } else {
+                // Cần wishlistItemId — lấy từ data attribute
+                params.append('itemId', btn.dataset.itemId);
+            }
+
+            try {
+                const resp = await fetch(CTX + '/wishlist?action=' + action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    btn.classList.toggle('active');
+                    btn.innerHTML = btn.classList.contains('active')
+                        ? '<span>♥</span> Đã yêu thích'
+                        : '<span>♡</span> Yêu thích';
+                    if (data.itemId) {
+                        btn.dataset.itemId = data.itemId;
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra, vui lòng thử lại');
+            }
         }
-
-        const resp = await fetch(CTX + '/wishlist?action=' + action, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params.toString()
-        });
-        const data = await resp.json();
-
-        if (data.success) {
-          btn.classList.toggle('active');
-          btn.innerHTML = btn.classList.contains('active')
-            ? '<i class="bi bi-heart-fill"></i> Đã yêu thích'
-            : '<i class="bi bi-heart"></i> Yêu thích';
-        }
-      }
     </script>
 <script>
 (function() {

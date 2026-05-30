@@ -34,6 +34,8 @@ public class CreateDiscountRequest {
     
     @Min(value = 0, message = "Giá trị đơn hàng tối thiểu phải lớn hơn hoặc bằng 0")
     private BigDecimal minOrderValue;
+
+    private Boolean isActive;
     
     // Getters and Setters
     public String getCode() {
@@ -99,6 +101,9 @@ public class CreateDiscountRequest {
     public void setMinOrderValue(BigDecimal minOrderValue) {
         this.minOrderValue = minOrderValue;
     }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
     
     // Validate that start date is before end date
     public boolean isValidDateRange() {

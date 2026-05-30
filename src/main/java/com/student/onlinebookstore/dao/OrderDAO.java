@@ -59,12 +59,6 @@ public class OrderDAO {
         "FROM orders o LEFT JOIN addresses a ON o.address_id = a.address_id " +
         "WHERE o.status = ? ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
     
-    private static final String SQL_UPDATE_ORDER_STATUS = 
-        "UPDATE orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
-    
-    private static final String SQL_UPDATE_PAYMENT_STATUS = 
-        "UPDATE orders SET payment_status = ?, updated_at = NOW() WHERE order_id = ?";
-    
     private static final String SQL_CANCEL_ORDER = 
         "UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE order_id = ? AND status = 'pending'";
     

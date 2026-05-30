@@ -38,7 +38,7 @@ public class HomeController {
             }
         }
         model.addAttribute("booksByGenre", booksByGenre);
-
+    
         return "home";
     }
 }

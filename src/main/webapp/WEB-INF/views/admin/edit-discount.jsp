@@ -51,7 +51,7 @@
                         </div>
                         <div class="form-group">
                             <label>Giá trị giảm <span class="required">*</span></label>
-                            <input type="number" name="discountValue" step="1000" value="${discount.discountValue}" required>
+                            <input type="number" name="discountValue" step="1" value="${discount.discountValueFormatted}" required>
                         </div>
                     </div>
 

@@ -26,17 +26,17 @@
             <!-- Hiển thị thông báo -->
             <c:if test="${not empty successMsg}">
                 <div class="alert-card" style="border-left-color: #2e7d32; background: #e8f5e9; margin-bottom: 20px;">
-                    <div class="alert-icon">✅</div>
+                    <div class="alert-icon">✔</div>
                     <div class="alert-content"><h4 style="color:#2e7d32;">${successMsg}</h4></div>
                 </div>
-                <% session.removeAttribute("successMsg"); %>
+                <c:remove var="successMsg" scope="session"/>
             </c:if>
             <c:if test="${not empty errorMsg}">
                 <div class="alert-card warning" style="margin-bottom: 20px;">
                     <div class="alert-icon">❌</div>
                     <div class="alert-content"><h4>${errorMsg}</h4></div>
                 </div>
-                <% session.removeAttribute("errorMsg"); %>
+                <c:remove var="errorMsg" scope="session"/>
             </c:if>
 
             <!-- Discounts Table -->
@@ -71,10 +71,10 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${discount.discountType == 'percent'}">
-                                            ${discount.discountValue}%
+                                            ${discount.discountValueFormatted}
                                         </c:when>
                                         <c:otherwise>
-                                            <fmt:formatNumber value="${discount.discountValue}" type="number" groupingUsed="true"/> ₫
+                                            ${discount.discountValueFormatted}
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
@@ -83,14 +83,17 @@
                                 <td>${discount.usedCount} / ${discount.maxUsage != null ? discount.maxUsage : '∞'}</td>
                                 <td>
                                     <c:choose>
-                                        <c:when test="${discount.isActive and discount.endDate > now}">
-                                            <span class="stock-badge ok">🟢 Hoạt động</span>
-                                        </c:when>
                                         <c:when test="${!discount.isActive}">
                                             <span class="stock-badge out">⚫ Vô hiệu</span>
                                         </c:when>
-                                        <c:otherwise>
+                                        <c:when test="${now > discount.endDate}">
                                             <span class="stock-badge out">🔴 Hết hạn</span>
+                                        </c:when>
+                                        <c:when test="${now < discount.startDate}">
+                                            <span class="stock-badge pending">🟡 Sắp diễn ra</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="stock-badge ok">🟢 Hoạt động</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>

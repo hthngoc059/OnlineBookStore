@@ -20,7 +20,6 @@ public class AddressController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        // Dùng ApplicationContextProvider nếu project dùng Spring, hoặc new AddressDAO() nếu không
         this.addressDAO = ApplicationContextProvider.getBean(AddressDAO.class);
     }
 
@@ -30,8 +29,14 @@ public class AddressController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        User user = (session != null) ? (User) session.getAttribute("currentUser") : null;
-
+        
+        // Kiểm tra session ngay từ đầu
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
+        
+        User user = (User) session.getAttribute("currentUser");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
@@ -43,14 +48,19 @@ public class AddressController extends HttpServlet {
                .forward(request, response);
     }
 
-    // ── POST: setDefault / delete ────────────────────────────────────────────
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        User user = (session != null) ? (User) session.getAttribute("currentUser") : null;
-
+        
+        // Kiểm tra session ngay từ đầu
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
+        
+        User user = (User) session.getAttribute("currentUser");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
@@ -59,17 +69,21 @@ public class AddressController extends HttpServlet {
         String action    = request.getParameter("action");
         String addressIdStr = request.getParameter("addressId");
 
+        // Kiểm tra addressId có tồn tại không (cho các action cần addressId)
+        if (addressIdStr == null || addressIdStr.trim().isEmpty()) {
+            session.setAttribute("errorMsg", "Thiếu thông tin địa chỉ.");
+            response.sendRedirect(request.getContextPath() + "/profile/addresses");
+            return;
+        }
+
         try {
             int addressId = Integer.parseInt(addressIdStr);
 
             if ("setDefault".equals(action)) {
-                // Bỏ mặc định tất cả → đặt mặc định cho địa chỉ được chọn
                 addressDAO.setDefaultAddress(user.getUserId(), addressId);
                 session.setAttribute("successMsg", "Đã thiết lập địa chỉ mặc định.");
 
             } else if ("delete".equals(action)) {
-                // Kiểm tra địa chỉ thuộc về user trước khi xóa (tránh IDOR)
-                // getAddressById không set user nên kiểm tra qua getAddressesByUserId
                 boolean owned = addressDAO.getAddressesByUserId(user.getUserId())
                         .stream().anyMatch(a -> a.getAddressId() == addressId);
                 if (owned) {
@@ -78,10 +92,12 @@ public class AddressController extends HttpServlet {
                 } else {
                     session.setAttribute("errorMsg", "Không thể xóa địa chỉ này.");
                 }
+            } else {
+                session.setAttribute("errorMsg", "Hành động không hợp lệ.");
             }
 
         } catch (NumberFormatException e) {
-            session.setAttribute("errorMsg", "Yêu cầu không hợp lệ.");
+            session.setAttribute("errorMsg", "ID địa chỉ không hợp lệ.");
         }
 
         response.sendRedirect(request.getContextPath() + "/profile/addresses");

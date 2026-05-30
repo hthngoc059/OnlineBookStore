@@ -48,7 +48,7 @@
                         </div>
                         <div class="form-group">
                             <label>Giá trị giảm <span class="required">*</span></label>
-                            <input type="number" name="discountValue" step="1000" required>
+                            <input type="number" name="discountValue" step="1" required>
                             <small>Nếu là %, nhập số (ví dụ: 10). Nếu là tiền, nhập số VNĐ</small>
                         </div>
                     </div>

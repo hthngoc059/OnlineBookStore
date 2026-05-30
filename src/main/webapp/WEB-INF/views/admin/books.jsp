@@ -22,6 +22,27 @@
                 </div>
                 <a href="${pageContext.request.contextPath}/admin/books?action=add" class="btn-primary">+ Thêm sách mới</a>
             </header>
+            
+            <!-- Hiển thị thông báo -->
+            <c:if test="${not empty successMsg}">
+                <div class="alert-card" style="border-left-color: #2e7d32; background: #e8f5e9; margin-bottom: 20px;">
+                    <div class="alert-icon">✔</div>
+                    <div class="alert-content">
+                        <h4 style="color:#2e7d32;">${successMsg}</h4>
+                    </div>
+                </div>
+                <% session.removeAttribute("successMsg"); %>
+            </c:if>
+
+            <c:if test="${not empty errorMsg}">
+                <div class="alert-card warning" style="margin-bottom: 20px;">
+                    <div class="alert-icon">✖</div>
+                    <div class="alert-content">
+                        <h4>${errorMsg}</h4>
+                    </div>
+                </div>
+                <% session.removeAttribute("errorMsg"); %>
+            </c:if>
 
             <!-- Filter Bar -->
             <div class="filter-bar">
@@ -56,7 +77,7 @@
                                 <td><img src="${not empty book.coverImageUrl ? book.coverImageUrl : pageContext.request.contextPath.concat('/images/default-book.jpg')}" class="table-avatar" alt="${book.title}"></td>
                                 <td class="book-title-cell">${book.title}</td>
                                 <td>${book.author}</td>
-                                <td><fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> ₫</td>
+                                <td><fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> đ</td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${book.stockQuantity <= 0}"><span class="stock-badge out">Hết hàng</span></c:when>

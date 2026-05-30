@@ -16,8 +16,8 @@
             <ul class="navbar__nav">
                 <li><a href="${pageContext.request.contextPath}/home">Trang chủ</a></li>
                 <li><a href="${pageContext.request.contextPath}/books">Tất cả sách</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Giới thiệu</a></li>
-                <li><a href="${pageContext.request.contextPath}/">Liên hệ</a></li>
+                <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                <li><a href="${pageContext.request.contextPath}/contact">Liên hệ</a></li>
                 <li class="navbar__search-item">
                     <form action="${pageContext.request.contextPath}/books" method="get">
                         <input type="hidden" 
@@ -78,7 +78,7 @@
                             <c:otherwise>
                                 <%-- User is NOT logged in --%>
                                 <a href="javascript:void(0)" onclick="openModal('login')" class="btn-link">Tài khoản</a>
-                            </c:otherwise>    
+                            </c:otherwise>
                         </c:choose>
             </div>
         </nav>
@@ -201,46 +201,9 @@
                                </div>
                            </c:forEach>
                        </div>
-
-                                <div class="book-info">
-                                    <h3 class="book-title">${book.title}</h3>
-                                    <p class="book-author">${book.author}</p>
-                                    <p class="book-price">${book.priceFormatted}</>
-
-                                    <!-- Hiện badge nếu hết hàng -->
-                                    <c:if test="${book.stockQuantity == 0}">
-                                        <span style="color:red; font-size:0.8rem;">Hết hàng</span>
-                                    </c:if>
-
-                                    <div class="book-actions">
-                                        <a href="${pageContext.request.contextPath}/books?action=detail&id=${book.bookId}"
-                                           class="btn-detail">Chi tiết</a>
-
-                                        <c:choose>
-                                            <c:when test="${book.stockQuantity > 0}">
-                                                <a href="${pageContext.request.contextPath}/cart?action=add&id=${book.bookId}"
-                                                   class="btn-add-cart">Thêm giỏ</a>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="btn-add-cart"
-                                                      style="opacity:0.4; cursor:not-allowed;">Hết hàng</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </c:forEach>
-                    </div>
-
-                    <!-- Xem thêm button -->
-                    <div class="view-more-wrapper">
-                        <a href="${pageContext.request.contextPath}/books" class="btn-view-more">Xem thêm</a>
-                    </div>
-
-                </c:otherwise>
-            </c:choose>
-        </main>                        
+                    </main>   
+               </c:forEach>
+            </c:if>                     
         <footer>
   <div class="footer__inner">
     <p class="footer__copy">© 2024 BookStore. All rights reserved.</p>
@@ -474,27 +437,27 @@
             });
         </script>
         <script>
-(function() {
-    const trigger = document.querySelector('.user-dropdown__trigger');
-    const menu    = document.querySelector('.user-dropdown__menu');
-    if (!trigger || !menu) return;
+            (function() {
+                const trigger = document.querySelector('.user-dropdown__trigger');
+                const menu    = document.querySelector('.user-dropdown__menu');
+                if (!trigger || !menu) return;
 
-    // Bấm vào trigger → toggle menu
-    trigger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        menu.classList.toggle('open');
-    });
+                // Bấm vào trigger → toggle menu
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    menu.classList.toggle('open');
+                });
 
-    // Bấm ra ngoài → đóng menu
-    document.addEventListener('click', function() {
-        menu.classList.remove('open');
-    });
+                // Bấm ra ngoài → đóng menu
+                document.addEventListener('click', function() {
+                    menu.classList.remove('open');
+                });
 
-    // Bấm vào menu không đóng
-    menu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-})();
-</script>
+                // Bấm vào menu không đóng
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            })();
+    </script>
     </body>
 </html>

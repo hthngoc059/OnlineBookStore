@@ -75,6 +75,8 @@ public class DiscountServiceImpl implements DiscountService {
             throw new ResourceNotFoundException("Không tìm thấy mã giảm giá");
         }
         
+        logger.info("Before update - EndDate: {}, IsActive: {}", discount.getEndDate(), discount.getIsActive());
+        
         // Update fields
         discount.setDescription(request.getDescription());
         discount.setDiscountType(Discount.DiscountType.valueOf(request.getDiscountType()));
@@ -82,6 +84,15 @@ public class DiscountServiceImpl implements DiscountService {
         discount.setStartDate(request.getStartDate());
         discount.setEndDate(request.getEndDate());
         discount.setMaxUsage(request.getMaxUsage());
+        
+        // ← THÊM DÒNG NÀY: Cập nhật isActive
+        if (request.getIsActive() != null) {
+            discount.setIsActive(request.getIsActive());
+        } else {
+            discount.setIsActive(true);  // Mặc định là active
+        }
+        
+        logger.info("After update - EndDate: {}, IsActive: {}", discount.getEndDate(), discount.getIsActive());
         
         boolean updated = discountDAO.updateDiscount(discount);
         if (!updated) {
@@ -335,15 +346,45 @@ public class DiscountServiceImpl implements DiscountService {
     public Discount validateDiscountForUser(String code, int userId) {
         logger.info("Validating discount code: {} for user: {}", code, userId);
 
-        Discount discount = discountDAO.validateDiscountForPreview(code.toUpperCase());
+        // Lấy discount từ database
+        Discount discount = discountDAO.getDiscountByCode(code.toUpperCase());
         if (discount == null) {
-            throw new InvalidCredentialsException("Mã không hợp lệ hoặc đã hết hạn");
+            throw new InvalidCredentialsException("Mã không hợp lệ hoặc không tồn tại");
         }
 
-        if (discountDAO.hasUserUsedDiscount(userId, (int) discount.getDiscountId())) {
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Kiểm tra ngày hết hạn
+        if (now.isAfter(discount.getEndDate())) {
+            logger.info("Discount expired: endDate={}, now={}", discount.getEndDate(), now);
+            throw new InvalidCredentialsException("Mã giảm giá đã hết hạn");
+        }
+        
+        // Kiểm tra ngày bắt đầu
+        if (now.isBefore(discount.getStartDate())) {
+            logger.info("Discount not yet started: startDate={}, now={}", discount.getStartDate(), now);
+            throw new InvalidCredentialsException("Mã giảm giá chưa đến hạn sử dụng");
+        }
+        
+        // Kiểm tra trạng thái active
+        if (!discount.getIsActive()) {
+            logger.info("Discount is inactive");
+            throw new InvalidCredentialsException("Mã giảm giá đã bị vô hiệu hóa");
+        }
+        
+        // Kiểm tra số lần sử dụng của user
+        if (discountDAO.hasUserUsedDiscount(userId, discount.getDiscountId())) {
+            logger.info("User {} has already used discount {}", userId, discount.getDiscountId());
             throw new InvalidCredentialsException("Bạn đã sử dụng mã giảm giá này rồi");
         }
-
+        
+        // Kiểm tra tổng số lần sử dụng của discount
+        if (discount.getMaxUsage() != null && discount.getUsedCount() >= discount.getMaxUsage()) {
+            logger.info("Discount reached max usage: {}/{}", discount.getUsedCount(), discount.getMaxUsage());
+            throw new InvalidCredentialsException("Mã giảm giá đã hết lượt sử dụng");
+        }
+        
+        logger.info("Discount is valid for user {}", userId);
         return discount;
     }
 }

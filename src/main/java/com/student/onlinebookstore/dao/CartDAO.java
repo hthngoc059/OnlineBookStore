@@ -12,9 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CartDAO {
     // SQL Queries
-    private static final String SQL_GET_OR_CREATE_CART = 
-        "INSERT INTO carts (user_id) VALUES (?) ON DUPLICATE KEY UPDATE cart_id = cart_id";
-    
     private static final String SQL_GET_CART_BY_USER = 
         "SELECT * FROM carts WHERE user_id = ?";
     

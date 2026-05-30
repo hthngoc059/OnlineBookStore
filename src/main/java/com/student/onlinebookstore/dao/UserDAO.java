@@ -39,9 +39,6 @@ public class UserDAO {
     private static final String SQL_UPDATE_PASSWORD = 
         "UPDATE users SET password = ?, updated_at = NOW() WHERE user_id = ?";
     
-    private static final String SQL_DELETE = 
-        "DELETE FROM users WHERE user_id = ?";
-    
     private static final String SQL_EXISTS_BY_EMAIL = 
         "SELECT COUNT(*) FROM users WHERE email = ?";
     

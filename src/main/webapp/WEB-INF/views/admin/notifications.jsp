@@ -25,7 +25,7 @@
             <!-- Hiển thị thông báo kết quả -->
             <c:if test="${not empty notifySuccess}">
                 <div class="alert-card" style="border-left-color: #2e7d32; background: #e8f5e9; margin-bottom: 20px;">
-                    <div class="alert-icon">✅</div>
+                    <div class="alert-icon">✔</div>
                     <div class="alert-content"><h4 style="color:#2e7d32;">${notifySuccess}</h4></div>
                 </div>
                 <% session.removeAttribute("notifySuccess"); %>

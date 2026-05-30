@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS orders (
     status ENUM('pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'returned') DEFAULT 'pending',
     payment_status ENUM('unpaid', 'paid', 'refunded') DEFAULT 'unpaid',
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (address_id) REFERENCES addresses(address_id)
+    FOREIGN KEY (address_id) REFERENCES addresses(address_id) ON DELETE CASCADE
 ); 
 
 CREATE TABLE IF NOT EXISTS order_items (
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS book_discount (
     discount_id INT,
     PRIMARY KEY (book_id, discount_id),
     FOREIGN KEY (book_id) REFERENCES books(book_id),
-    FOREIGN KEY (discount_id) REFERENCES discounts(discount_id)
+    FOREIGN KEY (discount_id) REFERENCES discounts(discount_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS notifications (
