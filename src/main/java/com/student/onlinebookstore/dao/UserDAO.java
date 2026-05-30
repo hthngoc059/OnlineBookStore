@@ -349,7 +349,7 @@ public class UserDAO {
         }
         return user;
     }
-<<<<<<< HEAD
+
     public boolean updatePhoneNumber(int userId, String phoneNumber) {
         String sql = "UPDATE users SET phone_number = ?, updated_at = NOW() WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -365,8 +365,6 @@ public class UserDAO {
             return false;
         }
     }
-    
-=======
 
     public List<User> searchUsers(String keyword, int page, int size) {
         List<User> users = new ArrayList<>();
@@ -468,5 +466,4 @@ public class UserDAO {
         
         return count;
     }
->>>>>>> 6a8f57f (fix admin panel bugs)
 }
