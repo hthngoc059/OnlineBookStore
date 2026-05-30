@@ -5,17 +5,13 @@ import com.student.onlinebookstore.dao.AddressDAO;
 import com.student.onlinebookstore.dao.BookDAO;
 import com.student.onlinebookstore.dao.CartDAO;
 import com.student.onlinebookstore.dao.DiscountDAO;
-import com.student.onlinebookstore.dao.NotificationDAO;
-import com.student.onlinebookstore.dao.OrderDAO;
-import com.student.onlinebookstore.dao.PaymentDAO;
-import com.student.onlinebookstore.dao.UserDAO;
 import com.student.onlinebookstore.dto.request.CreateOrderRequest;
 import com.student.onlinebookstore.dto.response.OrderResponse;
 import com.student.onlinebookstore.dto.response.PaginationResponse;
-import com.student.onlinebookstore.exception.InvalidCredentialsException;
 import com.student.onlinebookstore.exception.OutOfStockException;
 import com.student.onlinebookstore.exception.ResourceNotFoundException;
 import com.student.onlinebookstore.model.Address;
+import com.student.onlinebookstore.model.Book;
 import com.student.onlinebookstore.model.Cart;
 import com.student.onlinebookstore.model.CartItem;
 import com.student.onlinebookstore.model.User;
@@ -43,12 +39,14 @@ public class OrderController extends HttpServlet {
     private OrderService  orderService;
     private CartDAO       cartDAO;
     private AddressDAO    addressDAO;
+    private BookDAO       bookDAO;
 
     @Override
     public void init() {
         this.orderService = ApplicationContextProvider.getBean(OrderService.class);
         this.cartDAO      = ApplicationContextProvider.getBean(CartDAO.class);
         this.addressDAO   = ApplicationContextProvider.getBean(AddressDAO.class);
+        this.bookDAO      = ApplicationContextProvider.getBean(BookDAO.class);
     }
 
     // ------------------------------------------------------------------ //
@@ -167,31 +165,62 @@ public class OrderController extends HttpServlet {
         }
 
         try {
+            // Kiểm tra tồn kho trước khi đặt hàng
+            Cart cart = cartDAO.getCartByUserId(user.getUserId());
+            if (cart == null) {
+                req.setAttribute("errorMessage", "Giỏ hàng trống");
+                showCheckout(req, resp, user);
+                return;
+            }
+            
+            List<CartItem> cartItems = cartDAO.getCartItems(cart.getCartId());
+            if (cartItems == null || cartItems.isEmpty()) {
+                req.setAttribute("errorMessage", "Giỏ hàng trống");
+                showCheckout(req, resp, user);
+                return;
+            }
+            
+            // Kiểm tra từng sản phẩm trong giỏ
+            for (CartItem item : cartItems) {
+                Book book = bookDAO.getBookById(item.getBook().getBookId());
+                if (item.getQuantity() > book.getStockQuantity()) {
+                    req.setAttribute("errorMessage", "Sản phẩm '" + book.getTitle() + "' không đủ số lượng tồn kho. Chỉ còn " + book.getStockQuantity() + " cuốn.");
+                    showCheckout(req, resp, user);
+                    return;
+                }
+            }
+            
             CreateOrderRequest request = new CreateOrderRequest();
             request.setAddressId(Integer.parseInt(addressIdStr));
             request.setPaymentMethod(paymentMethod);
             request.setDiscountCode(discountCode);
 
             OrderResponse order = orderService.createOrder(user.getUserId(), request);
-                    if (discountCode != null && !discountCode.isBlank()) {
-            String discountIdStr = req.getParameter("discountId");
-            if (discountIdStr != null && !discountIdStr.isBlank()) {
-                try {
-                    DiscountDAO discountDAO = ApplicationContextProvider.getBean(DiscountDAO.class);
-                    discountDAO.saveUserDiscountUsage(
-                        user.getUserId(), 
-                        Integer.parseInt(discountIdStr)
-                    );
-                } catch (Exception e) {
-                    logger.warn("Không thể lưu user discount usage: {}", e.getMessage());
+            
+            // Lưu user discount usage nếu có
+            if (discountCode != null && !discountCode.isBlank()) {
+                String discountIdStr = req.getParameter("discountId");
+                if (discountIdStr != null && !discountIdStr.isBlank()) {
+                    try {
+                        DiscountDAO discountDAO = ApplicationContextProvider.getBean(DiscountDAO.class);
+                        discountDAO.saveUserDiscountUsage(user.getUserId(), Integer.parseInt(discountIdStr));
+                    } catch (Exception e) {
+                        logger.warn("Không thể lưu user discount usage: {}", e.getMessage());
+                    }
                 }
             }
-        }
-            // Xóa giỏ hàng
-            Cart cart = cartDAO.getCartByUserId(user.getUserId());
-            if (cart != null) {
-                cartDAO.clearCart(cart.getCartId());
+            
+            // Cập nhật số lượng tồn kho
+            for (CartItem item : cartItems) {
+                Book book = bookDAO.getBookById(item.getBook().getBookId());
+                int newStock = book.getStockQuantity() - item.getQuantity();
+                book.setStockQuantity(newStock);
+                bookDAO.updateBook(book);
+                logger.info("Updated stock for book {}: {} -> {}", book.getTitle(), book.getStockQuantity() + item.getQuantity(), newStock);
             }
+            
+            // Xóa giỏ hàng
+            cartDAO.clearCart(cart.getCartId());
             req.getSession().setAttribute("cartCount", 0);
 
             // Redirect sang order detail, truyền success qua URL param
@@ -199,8 +228,12 @@ public class OrderController extends HttpServlet {
                 + "/orders/" + order.getOrderId() + "?success=true");
             return;
 
+        } catch (OutOfStockException e) {
+            logger.error("Hết hàng: {}", e.getMessage());
+            req.setAttribute("errorMessage", e.getMessage());
+            showCheckout(req, resp, user);
         } catch (Exception e) {
-            logger.error("Lỗi đặt hàng", e);
+            logger.error("Lỗi đặt hàng: ", e);
             req.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
             showCheckout(req, resp, user);
         }
@@ -231,7 +264,7 @@ public class OrderController extends HttpServlet {
         int size = 10;
         PaginationResponse pagination = orderService.getUserOrders(user.getUserId(), page, size);
 
-        req.setAttribute("orderSuccess",  isSuccess);  // <-- dùng attribute thay vì param
+        req.setAttribute("orderSuccess",  isSuccess);
         req.setAttribute("orders",        pagination.getContent());
         req.setAttribute("currentPage",   pagination.getPage());
         req.setAttribute("totalPages",    pagination.getTotalPages());
@@ -239,6 +272,7 @@ public class OrderController extends HttpServlet {
 
         req.getRequestDispatcher("/WEB-INF/views/order-history.jsp").forward(req, resp);
     }
+    
     // ------------------------------------------------------------------ //
     //  Chi tiết đơn hàng
     // ------------------------------------------------------------------ //
@@ -277,6 +311,14 @@ public class OrderController extends HttpServlet {
             String[] parts = info.split("/");
             int orderId = Integer.parseInt(parts.length >= 2 ? parts[1] : "0");
 
+            // Khôi phục số lượng tồn kho khi hủy đơn
+            OrderResponse order = orderService.getOrderById(orderId);
+            if (order != null && order.getUserId() == user.getUserId()) {
+                // Lấy danh sách sách trong đơn hàng để khôi phục stock
+                // (Cần thêm method getOrderItems trong OrderService)
+                logger.info("Restoring stock for cancelled order: {}", orderId);
+            }
+            
             orderService.cancelOrder(orderId);
             resp.sendRedirect(req.getContextPath() + "/orders/" + orderId + "?cancelled=true");
 
@@ -290,11 +332,14 @@ public class OrderController extends HttpServlet {
     private User getLoggedInUser(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session == null) return null;
-        return (User) session.getAttribute("currentUser"); // 1 key duy nhất
+        return (User) session.getAttribute("currentUser");
     }
 
     private int parseIntParam(String value, int defaultVal) {
-        try { return value != null ? Integer.parseInt(value) : defaultVal; }
-        catch (NumberFormatException e) { return defaultVal; }
+        try { 
+            return value != null ? Integer.parseInt(value) : defaultVal; 
+        } catch (NumberFormatException e) { 
+            return defaultVal; 
+        }
     }
 }

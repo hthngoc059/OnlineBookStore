@@ -428,6 +428,7 @@ body {
 .stock-badge.ok { background: #e8f5e9; color: #2e7d32; }
 .stock-badge.low { background: #fff3e0; color: #ed6c02; }
 .stock-badge.out { background: #ffebee; color: #c62828; }
+.stock-badge.pending {background: #ded4aa; color: #f3d005;}
 
 /* ==================== FILTER BAR ==================== */
 .filter-bar {

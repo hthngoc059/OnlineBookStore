@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Year;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,7 +30,6 @@ public class BookServiceImpl implements BookService {
     private NotificationService notificationService;
     private FileUploadUtil fileUploadUtil;
     
-    @Autowired 
     public BookServiceImpl(BookDAO bookDAO, ReviewDAO reviewDAO, 
                           NotificationService notificationService, FileUploadUtil fileUploadUtil) {
         this.bookDAO = bookDAO;

@@ -34,7 +34,7 @@
                     <div class="stat-icon green">💰</div>
                     <div class="stat-info">
                         <h3>Tổng doanh thu</h3>
-                        <p class="stat-value"><fmt:formatNumber value="${totalRevenue}" type="number" groupingUsed="true"/> ₫</p>
+                        <p class="stat-value"><fmt:formatNumber value="${totalRevenue}" type="number" groupingUsed="true"/> đ</p>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -79,7 +79,7 @@
                                 <td>#${order.orderId}</td>
                                 <td>${order.user.username}</td>
                                 <td>${order.orderDate.toLocalDate()}</td>
-                                <td><fmt:formatNumber value="${order.finalAmount}" type="number" groupingUsed="true"/> ₫</td>
+                                <td><fmt:formatNumber value="${order.finalAmount}" type="number" groupingUsed="true"/> đ</td>
                                 <td><span class="status-badge ${order.status}">
                                     <c:choose>
                                         <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>

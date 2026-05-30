@@ -159,7 +159,7 @@
                                     </div>
                                 </td>
                                 <td data-label="Giá" class="cart-price">
-                                    <fmt:formatNumber value="${item.book.price}" type="number" groupingUsed="true"/> ₫
+                                    <fmt:formatNumber value="${item.book.price}" type="number" groupingUsed="true"/> 
                                 </td>
                                 <td data-label="Số lượng">
                                     <form action="${pageContext.request.contextPath}/cart" method="get" style="display:inline;">
@@ -175,7 +175,7 @@
                                     </form>
                                 </td>
                                 <td data-label="Tạm tính" class="cart-subtotal">
-                                    <fmt:formatNumber value="${item.book.price * item.quantity}" type="number" groupingUsed="true"/> ₫
+                                    <fmt:formatNumber value="${item.book.price * item.quantity}" type="number" groupingUsed="true"/> 
                                 </td>
                                 <td>
                                     <a href="${pageContext.request.contextPath}/cart?action=remove&itemId=${item.cartItemId}" 
@@ -197,7 +197,7 @@
                     <div class="cart-summary-right">
                         <p class="cart-total-label">Tổng cộng</p>
                         <p class="cart-total-price">
-                            <fmt:formatNumber value="${cartTotal}" type="number" groupingUsed="true"/> ₫
+                            <fmt:formatNumber value="${cartTotal}" type="number" groupingUsed="true"/> đ
                         </p>
                         <a href="${pageContext.request.contextPath}/checkout" class="btn-checkout">
                             Thanh toán

@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private PaymentDAO paymentDAO;
     private DiscountService discountService;
     private NotificationService notificationService;
-    @Autowired 
+
     public OrderServiceImpl(OrderDAO orderDAO, CartDAO cartDAO, BookDAO bookDAO,
                            AddressDAO addressDAO, PaymentDAO paymentDAO,
                            DiscountService discountService, NotificationService notificationService) {
