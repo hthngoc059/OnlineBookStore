@@ -130,11 +130,10 @@ Access: `http://localhost:8080/OnlineBookStore/`
 ## VIII. KNOWN ISSUES
 - Admin Panel:
     - Search by type and dropdown cannot work simultaneously
-    - Cannot send notifications to individual users when order status is updated
+    - Cannot send notifications to individual users when order status is updated by admin
 - Customer Panel: 
     - Review system does not verify whether the user has actually purchased the book before allowing them to write a review
-    - "Tất cả sách" page and search results page share the same JSP (search.jsp)
-    - Have no filter by genre while searching
+    - Banking payment method is only a simulation (not integrated with real payment gateway)
 
 
 ## IX. CONTACT
