@@ -350,6 +350,9 @@
         <p class="modal-switch-text">
           Chưa có tài khoản? <a onclick="switchTab('register')">Đăng ký ngay</a>
         </p>
+        <p class="modal-switch-text" style="margin-top:6px;">
+            <a onclick="switchTab('forgot')">Quên mật khẩu?</a>
+        </p>
       </div>
 
       <!-- REGISTER -->
@@ -383,7 +386,28 @@
           Đã có tài khoản? <a onclick="switchTab('login')">Đăng nhập</a>
         </p>
       </div>
-
+<!-- ── FORGOT PASSWORD FORM ── -->
+                    <div class="tab-content" id="content-forgot">
+                        <h3 style="margin-bottom:12px; font-size:1rem; font-weight:600;">Lấy lại mật khẩu</h3>
+                        <p style="font-size:0.85rem; color:#666; margin-bottom:14px;">
+                            Nhập đúng tên đăng nhập và email. Mật khẩu sẽ được reset về <strong>123456</strong>.
+                        </p>
+                        <div id="forgot-result"></div>
+                        <div class="modal-form-group">
+                            <label for="forgotUsername">Tên đăng nhập</label>
+                            <input type="text" id="forgotUsername" placeholder="Nhập tên đăng nhập">
+                        </div>
+                        <div class="modal-form-group">
+                            <label for="forgotEmail">Email đã đăng ký</label>
+                            <input type="email" id="forgotEmail" placeholder="example@email.com">
+                        </div>
+                        <button type="button" class="btn-modal-submit" onclick="handleForgotPassword()">
+                            Xác nhận
+                        </button>
+                        <p class="modal-switch-text" style="margin-top:12px;">
+                            <a onclick="switchTab('login')">← Quay lại đăng nhập</a>
+                        </p>
+                    </div>
     </div>
   </div>
 </div>
@@ -453,6 +477,7 @@
   });
 </script>
 <script>
+    const contextPath = '${pageContext.request.contextPath}';
             function openModal(tab) {
                 var modal = document.getElementById('authModal');
                 if (modal) {
@@ -479,27 +504,61 @@
                     closeModal();
                 }
             }
+            async function handleForgotPassword() {
+                var username  = document.getElementById('forgotUsername').value.trim();
+                var email     = document.getElementById('forgotEmail').value.trim();
+                var resultDiv = document.getElementById('forgot-result');
 
-            function switchTab(tab) {
-                var tabLogin = document.getElementById('tab-login');
-                var tabRegister = document.getElementById('tab-register');
-                var contentLogin = document.getElementById('content-login');
-                var contentRegister = document.getElementById('content-register');
+                if (!username || !email) {
+                    resultDiv.innerHTML = '<div class="modal-alert modal-alert-error">Vui lòng nhập đầy đủ thông tin.</div>';
+                    return;
+                }
 
-                if (tabLogin && tabRegister && contentLogin && contentRegister) {
-                    if (tab === 'login') {
-                        tabLogin.classList.add('active');
-                        tabRegister.classList.remove('active');
-                        contentLogin.classList.add('active');
-                        contentRegister.classList.remove('active');
+                resultDiv.innerHTML = '<div class="modal-alert">Đang xử lý...</div>';
+
+                try {
+                    var resp = await fetch(contextPath + '/user?action=forgotPassword'
+                        + '&username=' + encodeURIComponent(username)
+                        + '&email='    + encodeURIComponent(email));
+                    var data = await resp.json();
+                    if (data.success) {
+                        resultDiv.innerHTML =
+                            '<div class="modal-alert modal-alert-success">' +
+                            'Mật khẩu đã được reset về <strong>123456</strong>. ' +
+                            'Vui lòng đăng nhập và đổi mật khẩu ngay.' +
+                            '</div>';
+                        document.getElementById('forgotUsername').value = '';
+                        document.getElementById('forgotEmail').value = '';
                     } else {
-                        tabLogin.classList.remove('active');
-                        tabRegister.classList.add('active');
-                        contentLogin.classList.remove('active');
-                        contentRegister.classList.add('active');
+                        resultDiv.innerHTML = '<div class="modal-alert modal-alert-error">' + data.message + '</div>';
                     }
+                } catch (e) {
+                    resultDiv.innerHTML = '<div class="modal-alert modal-alert-error">Có lỗi xảy ra, vui lòng thử lại.</div>';
                 }
             }
+            function switchTab(tab) {
+    ['login', 'register', 'forgot'].forEach(function(t) {
+        var content = document.getElementById('content-' + t);
+        if (content) content.classList.remove('active');
+    });
+    ['login', 'register'].forEach(function(t) {
+        var tabBtn = document.getElementById('tab-' + t);
+        if (tabBtn) tabBtn.classList.remove('active');
+    });
+
+    if (tab === 'forgot') {
+        var forgotContent = document.getElementById('content-forgot');
+        if (forgotContent) forgotContent.classList.add('active');
+        document.getElementById('forgotUsername').value = '';
+        document.getElementById('forgotEmail').value = '';
+        document.getElementById('forgot-result').innerHTML = '';
+    } else {
+        var tabBtn = document.getElementById('tab-' + tab);
+        if (tabBtn) tabBtn.classList.add('active');
+        var content = document.getElementById('content-' + tab);
+        if (content) content.classList.add('active');
+    }
+}
 
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {

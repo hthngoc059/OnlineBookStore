@@ -465,4 +465,25 @@ public class UserDAO {
         }
         return user;
     }
+    private static final String SQL_GET_BY_USERNAME_AND_EMAIL =
+        "SELECT * FROM users WHERE username = ? AND email = ?";
+
+    public User getUserByUsernameAndEmail(String username, String email) {
+        User user = null;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL_GET_BY_USERNAME_AND_EMAIL)) {
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    user = mapResultSetToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
 }

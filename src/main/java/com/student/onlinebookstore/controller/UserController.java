@@ -30,6 +30,10 @@ public class UserController extends HttpServlet {
             if (session != null) session.invalidate();
             response.sendRedirect(request.getContextPath() + "/");
             return;
+        // THÊM ĐOẠN NÀY
+        } else if ("forgotPassword".equals(action)) {
+            handleForgotPassword(request, response);
+            return;
         }
         forwardToHome(request, response);
     }
@@ -183,4 +187,43 @@ public class UserController extends HttpServlet {
     }
 
     private String trim(String s) { return s == null ? "" : s.trim(); }
+    private void handleForgotPassword(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String username = request.getParameter("username");
+        String email    = request.getParameter("email");
+
+        System.out.println("=== handleForgotPassword ===");
+        System.out.println("Username: [" + username + "]");
+        System.out.println("Email: [" + email + "]");
+
+        if (username == null || username.trim().isEmpty() ||
+            email    == null || email.trim().isEmpty()) {
+            response.getWriter().write("{\"success\":false,\"message\":\"Vui lòng nhập đầy đủ thông tin.\"}");
+            return;
+        }
+
+        // Tìm thẳng bằng cả 2 field — nếu không khớp thì trả về null
+        User user = userDAO.getUserByUsernameAndEmail(username.trim(), email.trim());
+        System.out.println("User found: " + (user != null ? user.getUsername() : "null"));
+
+        if (user == null) {
+            response.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy tài khoản với thông tin này.\"}");
+            return;
+        }
+
+        if (user.getUserId() == null) {
+            response.getWriter().write("{\"success\":false,\"message\":\"Lỗi tài khoản.\"}");
+            return;
+        }
+
+        boolean updated = userDAO.updatePassword(user.getUserId(), "123456");
+        if (updated) {
+            response.getWriter().write("{\"success\":true}");
+        } else {
+            response.getWriter().write("{\"success\":false,\"message\":\"Có lỗi khi reset mật khẩu, vui lòng thử lại.\"}");
+        }
+    }
 }
