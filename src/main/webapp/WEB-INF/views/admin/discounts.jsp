@@ -90,7 +90,10 @@
                                             <span class="stock-badge out">🔴 Hết hạn</span>
                                         </c:when>
                                         <c:when test="${now < discount.startDate}">
-                                            <span class="stock-badge pending">🟡 Sắp diễn ra</span>
+                                            <span class="stock-badge pending" style="background: #ffffde; color: #ef950d; 
+                                            padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;">
+                                            🟡 Sắp diễn ra
+                                            </span>
                                         </c:when>
                                         <c:otherwise>
                                             <span class="stock-badge ok">🟢 Hoạt động</span>

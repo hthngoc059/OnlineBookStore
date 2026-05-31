@@ -63,9 +63,9 @@
                         <c:forEach var="item" items="${orderItems}">
                             <tr>
                                 <td><strong>${item.book.title}</strong><br><small>${item.book.author}</small></td>
-                                <td><fmt:formatNumber value="${item.priceAtTime}" type="number" groupingUsed="true"/> ₫</td>
+                                <td><fmt:formatNumber value="${item.priceAtTime}" type="number" groupingUsed="true"/> </td>
                                 <td>${item.quantity}</td>
-                                <td><fmt:formatNumber value="${item.priceAtTime * item.quantity}" type="number" groupingUsed="true"/> ₫</td>
+                                <td><fmt:formatNumber value="${item.priceAtTime * item.quantity}" type="number" groupingUsed="true"/> </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty orderItems}">
@@ -80,9 +80,9 @@
                 <div class="data-table-container">
                     <div class="table-header"><h3>💰 Tổng kết đơn hàng</h3></div>
                     <table class="data-table">
-                        <tr><th style="width:160px">Tạm tính</th><td><fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true"/> ₫</td></tr>
-                        <tr><th>Giảm giá</th><td>- <fmt:formatNumber value="${order.discountAmount}" type="number" groupingUsed="true"/> ₫</td></tr>
-                        <tr><th>Thành tiền</th><td><strong style="color:#405a28; font-size:1.1rem;"><fmt:formatNumber value="${order.finalAmount}" type="number" groupingUsed="true"/> ₫</strong></td></tr>
+                        <tr><th style="width:160px">Tạm tính</th><td><fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true"/> đ</td></tr>
+                        <tr><th>Giảm giá</th><td>- <fmt:formatNumber value="${order.discountAmount}" type="number" groupingUsed="true"/> đ</td></tr>
+                        <tr><th>Thành tiền</th><td><strong style="color:#405a28; font-size:1.1rem;"><fmt:formatNumber value="${order.finalAmount}" type="number" groupingUsed="true"/> đ</strong></td></tr>
                         <tr><th>Phương thức TT</th><td>
                             <c:choose>
                                 <c:when test="${payment != null && payment.paymentMethod == 'cod'}">💰 Thanh toán khi nhận hàng (COD)</c:when>

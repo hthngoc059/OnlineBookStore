@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,7 +25,6 @@ public class WishlistServiceImpl implements WishlistService {
     private CartDAO cartDAO;
     private BookDAO bookDAO;
     
-    @Autowired
     public WishlistServiceImpl(WishlistDAO wishlistDAO, CartDAO cartDAO, BookDAO bookDAO) {
         this.wishlistDAO = wishlistDAO;
         this.cartDAO = cartDAO;

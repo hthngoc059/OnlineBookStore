@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Year;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,7 +30,6 @@ public class BookServiceImpl implements BookService {
     private NotificationService notificationService;
     private FileUploadUtil fileUploadUtil;
     
-    @Autowired 
     public BookServiceImpl(BookDAO bookDAO, ReviewDAO reviewDAO, 
                           NotificationService notificationService, FileUploadUtil fileUploadUtil) {
         this.bookDAO = bookDAO;
@@ -48,7 +46,7 @@ public class BookServiceImpl implements BookService {
         if (request.getIsbn() != null && !request.getIsbn().isEmpty()) {
             Book existingBook = bookDAO.getBookByIsbn(request.getIsbn());
             if (existingBook != null) {
-                throw new DuplicateResourceException("ISBN is already in use");
+                throw new DuplicateResourceException("ISBN đã tồn tại: " + request.getIsbn());
             }
         }
         
@@ -78,7 +76,7 @@ public class BookServiceImpl implements BookService {
         
         boolean created = bookDAO.createBook(book);
         if (!created) {
-            throw new RuntimeException("Failed to create book");
+            throw new RuntimeException("Không thể tạo sách mới");
         }
         
         logger.info("Book created successfully with id: {}", book.getBookId());
@@ -91,7 +89,7 @@ public class BookServiceImpl implements BookService {
         
         Book book = bookDAO.getBookById(bookId);
         if (book == null) {
-            throw new ResourceNotFoundException("Book not found");
+            throw new ResourceNotFoundException("Sách không tồn tại");
         }
         
         // Upload new image if provided
@@ -112,7 +110,7 @@ public class BookServiceImpl implements BookService {
         
         boolean updated = bookDAO.updateBook(book);
         if (!updated) {
-            throw new RuntimeException("Failed to update book");
+            throw new RuntimeException("Không thể cập nhật sách");
         }
         
         // Check for low stock notification
@@ -130,7 +128,7 @@ public class BookServiceImpl implements BookService {
         
         Book book = bookDAO.getBookById(bookId);
         if (book == null) {
-            throw new ResourceNotFoundException("Book not found");
+            throw new ResourceNotFoundException("Sách không tồn tại");
         }
         
         return convertToResponse(book);
@@ -142,7 +140,7 @@ public class BookServiceImpl implements BookService {
         
         Book book = bookDAO.getBookBySlug(slug);
         if (book == null) {
-            throw new ResourceNotFoundException("Book not found");
+            throw new ResourceNotFoundException("Sách không tồn tại");
         }
         
         return convertToResponse(book);
@@ -154,7 +152,7 @@ public class BookServiceImpl implements BookService {
         
         Book book = bookDAO.getBookByIsbn(isbn);
         if (book == null) {
-            throw new ResourceNotFoundException("Book not found");
+            throw new ResourceNotFoundException("Sách không tồn tại");
         }
         
         return convertToResponse(book);
@@ -166,7 +164,7 @@ public class BookServiceImpl implements BookService {
         
         Book book = bookDAO.getBookById(bookId);
         if (book == null) {
-            throw new ResourceNotFoundException("Book not found");
+            throw new ResourceNotFoundException("Sách không tồn tại");
         }
         
         return bookDAO.deleteBook(bookId);

@@ -3,8 +3,6 @@ package com.student.onlinebookstore.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 

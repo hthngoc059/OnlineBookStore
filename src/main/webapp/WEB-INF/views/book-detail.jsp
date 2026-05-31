@@ -142,7 +142,7 @@
                 <!-- Price -->
                 <div class="detail-price-section">
                     <span class="detail-price">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> ₫
+                        ${book.priceFormatted} đ
                     </span>
                     <%-- If you add discounted price in the future, show it here --%>
                 </div>
@@ -280,7 +280,7 @@
                             <h3 class="book-title">${rb.title}</h3>
                             <p class="book-author">${rb.author}</p>
                             <p class="book-price">
-                                <fmt:formatNumber value="${rb.price}" type="number" groupingUsed="true"/> ₫
+                                <fmt:formatNumber value="${rb.price}" type="number" groupingUsed="true"/> đ
                             </p>
                             <div class="book-actions">
                                 <a href="${pageContext.request.contextPath}/books?action=detail&id=${rb.bookId}"
@@ -749,29 +749,106 @@
                 alertEl.style.display = 'block';
             }
         }
+        
+        function submitReview() {
+        const rating = document.getElementById('ratingInput').value;
+        const comment = document.getElementById('reviewComment').value;
+        const bookId = document.getElementById('reviewBookId').value;
+        const csrfName = document.getElementById('reviewCsrfName').value;
+        const csrfToken = document.getElementById('reviewCsrfToken').value;
+
+        // Kiểm tra đã chọn sao chưa
+        if (!rating || rating == 0) {
+            alert('Vui lòng chọn số sao đánh giá');
+            return;
+        }
+
+        // Hiển thị loading
+        const submitBtn = document.querySelector('.btn-submit-review');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang gửi...';
+
+        // Tạo form data
+        const params = new URLSearchParams();
+        params.append(csrfName, csrfToken);
+        params.append('bookId', bookId);
+        params.append('rating', rating);
+        params.append('comment', comment);
+
+        fetch(CTX + '/reviews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        })
+        .then(response => response.json())
+        .then(data => {
+            const alertDiv = document.getElementById('reviewAlert');
+            alertDiv.style.display = 'block';
+
+            if (data.success) {
+                alertDiv.className = 'modal-alert modal-alert-success';
+                alertDiv.innerHTML = '✅ ' + data.message + ' Cảm ơn bạn đã đánh giá!';
+
+                // Reset form
+                document.getElementById('ratingInput').value = 0;
+                document.getElementById('reviewComment').value = '';
+                document.querySelectorAll('.star-pick').forEach((p, i) => {
+                    p.style.color = '#ddd';
+                    p.classList.remove('selected');
+                });
+
+                // Tự động reload sau 2 giây để hiển thị review mới
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                alertDiv.className = 'modal-alert modal-alert-error';
+                alertDiv.innerHTML = '❌ ' + data.message;
+            }
+
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 4000);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const alertDiv = document.getElementById('reviewAlert');
+            alertDiv.style.display = 'block';
+            alertDiv.className = 'modal-alert modal-alert-error';
+            alertDiv.innerHTML = '❌ Có lỗi xảy ra, vui lòng thử lại sau';
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 3000);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
     </script>
-<script>
-(function() {
-    const trigger = document.querySelector('.user-dropdown__trigger');
-    const menu    = document.querySelector('.user-dropdown__menu');
-    if (!trigger || !menu) return;
+    <script>
+    (function() {
+        const trigger = document.querySelector('.user-dropdown__trigger');
+        const menu    = document.querySelector('.user-dropdown__menu');
+        if (!trigger || !menu) return;
 
-    // Bấm vào trigger → toggle menu
-    trigger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        menu.classList.toggle('open');
-    });
+        // Bấm vào trigger → toggle menu
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menu.classList.toggle('open');
+        });
 
-    // Bấm ra ngoài → đóng menu
-    document.addEventListener('click', function() {
-        menu.classList.remove('open');
-    });
+        // Bấm ra ngoài → đóng menu
+        document.addEventListener('click', function() {
+            menu.classList.remove('open');
+        });
 
-    // Bấm vào menu không đóng
-    menu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-})();
-</script>
+        // Bấm vào menu không đóng
+        menu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    })();
+    </script>
 </body>
 </html>

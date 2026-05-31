@@ -55,7 +55,7 @@
                                 <td><strong>${book.title}</strong></td>
                                 <td>${book.author}</td>
                                 <td>${book.totalSold} cuốn</td>
-                                <td><fmt:formatNumber value="${book.revenue}" type="number" groupingUsed="true"/> ₫</td>
+                                <td><fmt:formatNumber value="${book.revenue}" type="number" groupingUsed="true"/> đ</td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty topSellingBooks}">
@@ -67,7 +67,7 @@
 
             <!-- Revenue Summary -->
             <div class="stat-grid" style="margin-top: 24px;">
-                <div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><h3>Tổng doanh thu</h3><p class="stat-value"><fmt:formatNumber value="${totalRevenue}" type="number" groupingUsed="true"/> ₫</p></div></div>
+                <div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><h3>Tổng doanh thu</h3><p class="stat-value"><fmt:formatNumber value="${totalRevenue}" type="number" groupingUsed="true"/> đ</p></div></div>
                 <div class="stat-card"><div class="stat-icon blue">📦</div><div class="stat-info"><h3>Tổng đơn hàng</h3><p class="stat-value">${totalOrders}</p></div></div>
                 <div class="stat-card"><div class="stat-icon orange">⭐</div><div class="stat-info"><h3>Đánh giá trung bình</h3><p class="stat-value">${avgRating} / 5</p></div></div>
             </div>
@@ -114,7 +114,7 @@
                             callbacks: {
                                 label: function(context) {
                                     let value = context.raw;
-                                    return 'Doanh thu: ' + value.toLocaleString('vi-VN') + ' ₫';
+                                    return 'Doanh thu: ' + value.toLocaleString('vi-VN') + ' ';
                                 }
                             }
                         }
@@ -123,7 +123,7 @@
                         y: {
                             ticks: {
                                 callback: function(value) {
-                                    return value.toLocaleString('vi-VN') + ' ₫';
+                                    return value.toLocaleString('vi-VN') + ' ';
                                 }
                             }
                         }
@@ -156,7 +156,7 @@
                                     let value = context.raw;
                                     let total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     let percentage = ((value / total) * 100).toFixed(1);
-                                    return `${label}: ${value.toLocaleString('vi-VN')} ₫ (${percentage}%)`;
+                                    return `${label}: ${value.toLocaleString('vi-VN')}  (${percentage}%)`;
                                 }
                             }
                         }
