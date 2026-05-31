@@ -25,7 +25,7 @@
                     <div class="book-info">
                         <h3>${book.title}</h3>
                         <p>${book.author}</p>
-                        <p>${book.price} ₫</p>
+                        <p>${book.priceFormatted} đ</p>
                     </div>
 
                 </div>

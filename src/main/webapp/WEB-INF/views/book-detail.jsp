@@ -142,7 +142,7 @@
                 <!-- Price -->
                 <div class="detail-price-section">
                     <span class="detail-price">
-                        <fmt:formatNumber value="${book.price}" type="number" groupingUsed="true"/> ₫
+                        ${book.priceFormatted} đ
                     </span>
                     <%-- If you add discounted price in the future, show it here --%>
                 </div>

@@ -128,6 +128,7 @@ Copy `target/OnlineBookStore-1.0-SNAPSHOT.war` to Tomcat's `webapps` directory
 Access: `http://localhost:8080/OnlineBookStore/`
 
 ## VIII. KNOWN ISSUES
+- Ebook and Audiobook formats are not fully processed (only physical books are handled properly; digital formats lack playback or download functionality)
 - Admin Panel:
     - Search by type and dropdown cannot work simultaneously
     - Cannot send notifications to individual users when order status is updated by admin

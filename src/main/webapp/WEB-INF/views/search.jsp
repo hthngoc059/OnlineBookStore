@@ -160,7 +160,7 @@
                         <div class="book-info">
                             <h3 class="book-title">${book.title}</h3>
                             <p class="book-author">${book.author}</p>
-                            <p class="book-price">${book.price} ₫</p>
+                            <p class="book-price">${book.priceFormatted} đ</p>
 
                             <c:if test="${book.stockQuantity == 0}">
                                 <span class="book-out-of-stock">Hết hàng</span>
