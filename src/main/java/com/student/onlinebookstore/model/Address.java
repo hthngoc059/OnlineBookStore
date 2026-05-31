@@ -62,5 +62,6 @@ public class Address {
     public void setCity(String city) { this.city = city; }
     
     public Boolean getIsDefault() { return isDefault; }
+    public Boolean isDefault() { return isDefault; }
     public void setIsDefault(Boolean isDefault) { this.isDefault = isDefault; }
 }

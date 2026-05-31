@@ -202,9 +202,8 @@
         <%-- Thiết lập mặc định --%>
         <div class="addr-default-row">
           <input type="checkbox" id="isDefault" name="isDefault"
-                 ${editMode && address.isDefault ? 'checked' : ''}/>
+                 ${editMode && address.isDefault == true ? 'checked' : ''}/>
           <label for="isDefault">
-            <i class="bi bi-star-fill" style="color:#f5a623;margin-right:4px;"></i>
             Đặt làm địa chỉ mặc định
           </label>
         </div>

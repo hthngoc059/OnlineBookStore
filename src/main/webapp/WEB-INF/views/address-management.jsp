@@ -144,7 +144,7 @@
                                     ${addr.addressLine}<br/>
                                     ${addr.ward}, ${addr.district}, ${addr.city}
                                 </div>
-                                <c:if test="${addr.isDefault}">
+                                <c:if test="${addr.isDefault == true}">
                                     <div class="addr-tags">
                                         <span class="addr-tag">Mặc định</span>
                                         <span class="addr-tag addr-tag--pickup">Địa chỉ lấy hàng</span>
@@ -156,7 +156,7 @@
                                 <div class="addr-action-links">
                                     <a href="${pageContext.request.contextPath}/address?action=edit&id=${addr.addressId}"
                                        class="btn-addr-edit">Cập nhật</a>
-                                    <c:if test="${!addr.isDefault}">
+                                    <c:if test="${addr.isDefault != true}">
                                         <form method="post"
                                               action="${pageContext.request.contextPath}/profile/addresses"
                                               style="display:inline;"
@@ -168,7 +168,7 @@
                                         </form>
                                     </c:if>
                                 </div>
-                                <c:if test="${!addr.isDefault}">
+                                <c:if test="${addr.isDefault != true}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/profile/addresses">
                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>

@@ -107,8 +107,8 @@
                    class="profile-nav-item ${param.action == 'password' ? 'active' : ''}">
                     Đổi mật khẩu
                 </a>
-                <a href="${pageContext.request.contextPath}/profile?action=addresses"
-                    class="profile-nav-item ${param.action == 'addresses' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/profile/addresses"
+                    class="profile-nav-item">
                      Địa chỉ
                  </a>
             </div>
@@ -132,9 +132,11 @@
 
                 <c:if test="${not empty successMsg}">
                     <div class="profile-alert profile-alert--ok">✅ ${successMsg}</div>
+                    <c:remove var="successMsg" scope="session"/>
                 </c:if>
                 <c:if test="${not empty errorMsg}">
                     <div class="profile-alert profile-alert--err">❌ ${errorMsg}</div>
+                    <c:remove var="successMsg" scope="session"/>
                 </c:if>
 
                 <form method="post"
@@ -213,9 +215,11 @@
 
                 <c:if test="${not empty successMsg}">
                     <div class="profile-alert profile-alert--ok">✅ ${successMsg}</div>
+                    <c:remove var="successMsg" scope="session"/>
                 </c:if>
                 <c:if test="${not empty errorMsg}">
                     <div class="profile-alert profile-alert--err">❌ ${errorMsg}</div>
+                    <c:remove var="successMsg" scope="session"/>
                 </c:if>
 
                 <form method="post" action="${pageContext.request.contextPath}/profile">
