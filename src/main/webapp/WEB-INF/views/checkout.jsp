@@ -332,7 +332,7 @@
 
   let appliedDiscount = 0;
   let appliedDiscountId = null;
-
+  const usedCodes = new Set();
   function selectCard(label, cls) {
     document.querySelectorAll('.' + cls).forEach(el => el.classList.remove('selected'));
     label.classList.add('selected');
@@ -347,7 +347,10 @@
       showMsg(msg, 'err', 'Vui lòng nhập mã giảm giá');
       return;
     }
-
+    if (usedCodes.has(code)) {
+        showMsg(msg, 'err', '❌ Mã này đã được áp dụng trong đơn hàng');
+        return;
+      }
     // Loading state
     btn.disabled = true;
     btn.textContent = 'Đang kiểm tra...';
@@ -369,6 +372,7 @@
       const data = await res.json();
 
       if (data.success) {
+        usedCodes.add(code);
         appliedDiscount   = Number(data.discountAmount);
         appliedDiscountId = data.discountId;
 
